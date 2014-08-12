@@ -1507,6 +1507,21 @@ config SERIAL_ST_ASC_CONSOLE
 	depends on SERIAL_ST_ASC=y
 	select SERIAL_CORE_CONSOLE
 
+	
+config SERIAL_TSUART
+        tristate "TSUART support"
+        depends on MACH_TS47XX
+        select SERIAL_CORE
+
+config SERIAL_TSUART_BAT3
+        tristate "TSUART driver for TS-BAT3"
+        depends on SERIAL_TSUART && MACH_TS47XX
+
+config SERIAL_TSUART_RF
+        tristate "TSUART driver for TS-RF2"
+        depends on SERIAL_TSUART
+
 endmenu
+
 
 endif # TTY

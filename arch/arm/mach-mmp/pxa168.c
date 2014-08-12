@@ -48,6 +48,7 @@ static struct mfp_addr_map pxa168_mfp_addr_map[] __initdata =
 void __init pxa168_init_irq(void)
 {
 	icu_init_irq();
+	ts4700_init_mux_irq();
 }
 
 static int __init pxa168_init(void)
@@ -92,6 +93,7 @@ void pxa168_clear_keypad_wakeup(void)
 }
 
 /* on-chip devices */
+/*            name,   driver,       id, irq, start, size, dma... */
 PXA168_DEVICE(uart1, "pxa2xx-uart", 0, UART1, 0xd4017000, 0x30, 21, 22);
 PXA168_DEVICE(uart2, "pxa2xx-uart", 1, UART2, 0xd4018000, 0x30, 23, 24);
 PXA168_DEVICE(uart3, "pxa2xx-uart", 2, UART3, 0xd4026000, 0x30, 23, 24);

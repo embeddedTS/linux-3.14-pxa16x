@@ -55,6 +55,7 @@ static void __init pxa910_dt_init(void)
 static const char *mmp_dt_board_compat[] __initdata = {
 	"mrvl,pxa168-aspenite",
 	"mrvl,pxa910-dkb",
+	"mrvl,pxa168-ts471x",
 	NULL,
 };
 
@@ -69,5 +70,12 @@ DT_MACHINE_START(PXA910_DT, "Marvell PXA910 (Device Tree Support)")
 	.map_io		= mmp_map_io,
 	.init_time	= mmp_dt_init_timer,
 	.init_machine	= pxa910_dt_init,
+	.dt_compat	= mmp_dt_board_compat,
+MACHINE_END
+
+DT_MACHINE_START(TS47XX_DT, "Technologic Systems TS-471X (Device Tree Support)")
+	.map_io		= mmp_map_io,
+	.init_time	= mmp_dt_init_timer,
+	.init_machine	= pxa168_dt_init,
 	.dt_compat	= mmp_dt_board_compat,
 MACHINE_END

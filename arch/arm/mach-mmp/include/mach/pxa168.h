@@ -134,4 +134,11 @@ static inline int pxa168_add_eth(struct pxa168_eth_platform_data *data)
 {
 	return pxa_register_device(&pxa168_device_eth, data, sizeof(*data));
 }
+
+
+#ifdef CONFIG_MACH_TS47XX
+extern void ts4700_init_mux_irq(void);
+#endif
+
+
 #endif /* __ASM_MACH_PXA168_H */

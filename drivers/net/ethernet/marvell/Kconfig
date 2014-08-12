@@ -64,6 +64,21 @@ config PXA168_ETH
 	  To compile this driver as a module, choose M here. The module
 	  will be called pxa168_eth.
 
+	  
+config PXA_SWITCH_WORKAROUND
+   bool "Marvell 88E6020/6070/6071 Workaround"
+   depends on PXA168_ETH && MACH_TS47XX && VLAN_8021Q
+   help
+      The Marvell 88E6020/6070/6071 switch chip appears to
+      have a bug when stripping vlan-tagged packets out of the chip.
+      It seems that when the stripped size is between 61 and 63 bytes,
+      the chip is meant to pad the packets back to the 64-byte minimum,
+      but doesn't do so. This workaround adds some padding bytes to the 
+      ethernet packet to make sure that when the chip strips the vlan tag,
+      the size of the packet doesn't dip below 64 bytes.
+      
+      See pxa168_eth.c for details.
+
 config SKGE
 	tristate "Marvell Yukon Gigabit Ethernet support"
 	depends on PCI

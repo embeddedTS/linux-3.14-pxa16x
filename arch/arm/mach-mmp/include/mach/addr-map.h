@@ -43,4 +43,11 @@
 #define CIU_VIRT_BASE		(AXI_VIRT_BASE + 0x82c00)
 #define CIU_REG(x)		(CIU_VIRT_BASE + (x))
 
+
+#ifdef CONFIG_MACH_TS47XX
+#define TS47XX_FPGA_PHYS_BASE  0x80004000
+#define TS47XX_FPGA_VIRT_BASE  0xfe400000 
+#define TS47XX_FPGA_PHYS_SIZE  4096
+#endif
+
 #endif /* __ASM_MACH_ADDR_MAP_H */

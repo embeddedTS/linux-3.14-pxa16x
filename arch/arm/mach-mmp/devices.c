@@ -72,7 +72,7 @@ int __init pxa_register_device(struct pxa_device_desc *desc,
 	return platform_device_add(pdev);
 }
 
-#if defined(CONFIG_USB) || defined(CONFIG_USB_GADGET)
+#if defined(CONFIG_USB) || defined(CONFIG_USB_GADGET) || defined(CONFIG_USB_MODULE) || defined(CONFIG_USB_GADGET_MODULE)
 
 /*****************************************************************************
  * The registers read/write routines

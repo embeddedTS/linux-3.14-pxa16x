@@ -44,6 +44,7 @@
 #define APMU_CCIC0	0x50
 #define APMU_DFC	0x60
 #define MPMU_UART_PLL	0x14
+#define APMU_FE  0xFC
 
 static DEFINE_SPINLOCK(clk_lock);
 
@@ -293,7 +294,11 @@ void __init pxa168_clk_init(void)
 
 	clk = mmp_clk_register_apmu("sdh0", "sdh_mux", apmu_base + APMU_SDH0,
 				0x1b, &clk_lock);
-	clk_register_clkdev(clk, NULL, "sdhci-pxa.0");
+#if defined(CONFIG_MACH_TS47XX) && defined(CONFIG_MMC_SDHCI_PXAV2)  	
+	clk_register_clkdev(clk, "PXA-SDHCLK", "sdhci-pxav2.0"); 
+#else	
+   clk_register_clkdev(clk, NULL, "sdhci-pxa.0");
+#endif
 
 	clk = clk_register_mux(NULL, "sdh1_mux", sdh_parent,
 				ARRAY_SIZE(sdh_parent),
@@ -303,7 +308,11 @@ void __init pxa168_clk_init(void)
 
 	clk = mmp_clk_register_apmu("sdh1", "sdh1_mux", apmu_base + APMU_SDH1,
 				0x1b, &clk_lock);
+#if defined(CONFIG_MACH_TS47XX) && defined(CONFIG_MMC_SDHCI_PXAV2)
+	clk_register_clkdev(clk, "PXA-SDHCLK", "sdhci-pxav2.1");
+#else	
 	clk_register_clkdev(clk, NULL, "sdhci-pxa.1");
+#endif
 
 	clk = mmp_clk_register_apmu("usb", "usb_pll", apmu_base + APMU_USB,
 				0x9, &clk_lock);
@@ -311,7 +320,7 @@ void __init pxa168_clk_init(void)
 
 	clk = mmp_clk_register_apmu("sph", "usb_pll", apmu_base + APMU_USB,
 				0x12, &clk_lock);
-	clk_register_clkdev(clk, "sph_clk", NULL);
+	clk_register_clkdev(clk, NULL, "pxa-sph");
 
 	clk = clk_register_mux(NULL, "disp0_mux", disp_parent,
 				ARRAY_SIZE(disp_parent),
@@ -355,4 +364,8 @@ void __init pxa168_clk_init(void)
 	clk = mmp_clk_register_apmu("ccic0_sphy", "ccic0_sphy_div",
 				apmu_base + APMU_CCIC0, 0x300, &clk_lock);
 	clk_register_clkdev(clk, "sphyclk", "mmp-ccic.0");
+		
+	clk = mmp_clk_register_apmu("pxa168-eth", NULL,
+				apmu_base + APMU_FE, 0x09, &clk_lock);
+	clk_register_clkdev(clk, "MFUCLK", "pxa168-eth");
 }

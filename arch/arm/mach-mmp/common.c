@@ -37,6 +37,15 @@ static struct map_desc standard_io_desc[] __initdata = {
 		.length		= AXI_PHYS_SIZE,
 		.type		= MT_DEVICE,
 	},
+#ifdef CONFIG_MACH_TS47XX
+   {
+      .pfn     = __phys_to_pfn(TS47XX_FPGA_PHYS_BASE),
+      .virtual = TS47XX_FPGA_VIRT_BASE,
+      .length  = TS47XX_FPGA_PHYS_SIZE,
+      .type    = MT_DEVICE,
+   },
+#endif
+	
 };
 
 void __init mmp_map_io(void)

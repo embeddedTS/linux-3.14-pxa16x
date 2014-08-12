@@ -302,3 +302,11 @@ config SERIAL_8250_RT288X
 	  If you have a Ralink RT288x/RT305x SoC based board and want to use the
 	  serial port, say Y to this option. The driver can handle up to 2 serial
 	  ports. If unsure, say N.
+
+config SERIAL_TS4700_ISA16550
+   tristate "TS-4700 ISA 16550 serial port support"
+   depends on SERIAL_8250 && MACH_TS47XX
+   help
+     TS-4700 ISA 16550 serial port support.  
+     Select this if you want to use Technologic Systems PC-104
+     products that have 16550-style UARTS, e.g., the TS-SER2 board.

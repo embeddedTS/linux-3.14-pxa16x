@@ -322,6 +322,7 @@ dtb-$(CONFIG_ARCH_VT8500) += vt8500-bv07.dtb \
 dtb-$(CONFIG_ARCH_ZYNQ) += zynq-zc702.dtb \
 	zynq-zc706.dtb \
 	zynq-zed.dtb
+dtb-$(CONFIG_ARCH_MMP) += pxa168-ts471x.dtb
 
 targets += dtbs
 targets += $(dtb-y)

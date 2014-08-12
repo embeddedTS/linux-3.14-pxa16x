@@ -2995,9 +2995,15 @@ int serial8250_find_port(struct uart_port *p)
 static struct uart_driver serial8250_reg = {
 	.owner			= THIS_MODULE,
 	.driver_name		= "serial",
-	.dev_name		= "ttyS",
+#if defined(CONFIG_SERIAL_TS4700_ISA16550) || defined(CONFIG_SERIAL_TS4700_ISA16550_MODULE)
+   .dev_name   = "ttyZ",
+   .major      = 222,
+   .minor      = 0,
+#else	
+	.dev_name		= "ttyX",
 	.major			= TTY_MAJOR,
 	.minor			= 64,
+#endif	
 	.cons			= SERIAL8250_CONSOLE,
 };
 
