@@ -18,7 +18,6 @@
 #include <linux/delay.h>
 #include <linux/usb.h>
 #include <linux/usb/otg.h>
-//#include <plat/pxa_u2o.h>
 #include <linux/pci.h>
 #include <asm/mach-types.h>
 #include <asm/mach/arch.h>
@@ -26,19 +25,8 @@
 #include <mach/mfp-pxa168.h>
 #include <mach/pxa168.h>
 #include <mach/irqs.h>
-//#include <mach/gpio.h>
-//#include <mach/max8660.h>
-//#include <mach/pxa3xx_nand.h>
-//#include <mach/camera.h>
 #include <mach/mfp-pxa168.h>
-//#include <mach/pxa168_eth.h>
-//#include <mach/pxa168_pcie.h>
 
-//#include <plat/part_table.h>
-//#include <plat/generic.h>
-//#include <plat/pxa3xx_pmic.h>
-//#include <plat/pxa_u2o.h>
-//#include <plat/pxa3xx_otg.h>
 #if defined(CONFIG_SPI_PXA2XX)
 #include <linux/spi/spi.h>
 #include <plat/pxa2xx_spi.h>
