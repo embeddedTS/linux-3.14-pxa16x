@@ -330,11 +330,11 @@ void __init pxa168_clk_init(void)
 
 	clk = mmp_clk_register_apmu("disp0", "disp0_mux",
 				apmu_base + APMU_DISP0, 0x1b, &clk_lock);
-	clk_register_clkdev(clk, "fnclk", "mmp-disp.0");
+	clk_register_clkdev(clk, "fnclk", "pxa168-fb");
 
 	clk = mmp_clk_register_apmu("disp0_hclk", "disp0_mux",
 				apmu_base + APMU_DISP0, 0x24, &clk_lock);
-	clk_register_clkdev(clk, "hclk", "mmp-disp.0");
+	clk_register_clkdev(clk, "hclk", "pxa168-fb");
 
 	clk = clk_register_mux(NULL, "ccic0_mux", ccic_parent,
 				ARRAY_SIZE(ccic_parent),
@@ -368,4 +368,8 @@ void __init pxa168_clk_init(void)
 	clk = mmp_clk_register_apmu("pxa168-eth", NULL,
 				apmu_base + APMU_FE, 0x09, &clk_lock);
 	clk_register_clkdev(clk, "MFUCLK", "pxa168-eth");
+	
+	
+	
+	
 }

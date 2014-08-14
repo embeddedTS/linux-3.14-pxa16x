@@ -842,7 +842,7 @@ struct pxa168fb_mach_info ts4700_lcd_info __initdata = {
 	.id                     = "Graphic Frame",
 	.modes                  = video_modes,
 	.num_modes              = ARRAY_SIZE(video_modes),
-	.pix_fmt                = PIX_FMT_RGB565,
+	.pix_fmt                = PIX_FMT_RGB888PACK,
 	.io_pin_allocation_mode = PIN_MODE_DUMB_24,
 	.dumb_mode              = DUMB_MODE_RGB888,
 	.active                 = 1,
@@ -856,7 +856,7 @@ struct pxa168fb_mach_info ts4700_lcd_ovly_info __initdata = {
 	.id                     = "Graphic Ovly",
 	.modes                  = video_modes,
 	.num_modes              = ARRAY_SIZE(video_modes),
-	.pix_fmt                = PIX_FMT_RGB565,
+	.pix_fmt                = PIX_FMT_RGB888PACK,
 	.io_pin_allocation_mode = PIN_MODE_DUMB_24,
 	.dumb_mode              = DUMB_MODE_RGB888,
 	.active                 = 1,
@@ -868,14 +868,10 @@ struct pxa168fb_mach_info ts4700_lcd_ovly_info __initdata = {
 #if defined(CONFIG_TOUCHSCREEN_ILI210X) || defined(CONFIG_TOUCHSCREEN_ILI210X_MODULE)
 static bool ili210x_pendown_state(void)
 {
-   
-	unsigned int pen;
+   unsigned int pen;
 	pen = mfp_to_gpio(MFP_PIN_GPIO49);
-    gpio_request(pen, "ili210x pendown irq");
+   gpio_request(pen, "ili210x pendown irq");
 	gpio_direction_input(pen);
-
-
-	//return 0;
 }
 
 static struct ili210x_platform_data ili_info = {
@@ -1270,7 +1266,7 @@ static void __init ts4700_init(void)
 	
 #if (defined(CONFIG_FB_PXA168_OLD) || defined(CONFIG_FB_PXA168_OLD_MODULE) || defined(CONFIG_FB_PXA168) || defined(CONFIG_FB_PXA168_MODULE))	
 	if (baseboardHasLCD) {
-		//pxa168_add_fb(&ts4700_lcd_info);
+		pxa168_add_fb(&ts4700_lcd_info);
 		//pxa168_add_fb_ovly(&ts4700_lcd_ovly_info);
 
 #if (defined(CONFIG_TOUCHSCREEN_TSLCD) || defined(CONFIG_TOUCHSCREEN_TSLCD_MODULE))

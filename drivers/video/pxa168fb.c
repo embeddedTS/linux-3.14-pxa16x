@@ -615,9 +615,9 @@ static int pxa168fb_probe(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
-	clk = clk_get(&pdev->dev, "LCDCLK");
+	clk = clk_get(&pdev->dev, "hclk");
 	if (IS_ERR(clk)) {
-		dev_err(&pdev->dev, "unable to get LCDCLK");
+		dev_err(&pdev->dev, "unable to get hclk");
 		return PTR_ERR(clk);
 	}
 
@@ -715,8 +715,19 @@ static int pxa168fb_probe(struct platform_device *pdev)
 	/*
 	 * enable controller clock
 	 */
+	clk_prepare(fbi->clk);
 	clk_enable(fbi->clk);
 
+	clk = clk_get(&pdev->dev, "fnclk");
+	if (IS_ERR(clk)) {
+		dev_err(&pdev->dev, "unable to get fnclk");
+		//return PTR_ERR(clk);
+	}
+	
+	clk_prepare(clk);
+	clk_enable(clk);
+	
+	
 	pxa168fb_set_par(info);
 
 	/*
