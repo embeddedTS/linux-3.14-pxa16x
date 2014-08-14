@@ -1270,7 +1270,7 @@ static void __init ts4700_init(void)
 		//pxa168_add_fb_ovly(&ts4700_lcd_ovly_info);
 
 #if (defined(CONFIG_TOUCHSCREEN_TSLCD) || defined(CONFIG_TOUCHSCREEN_TSLCD_MODULE))
-		//pxa_register_device(&pxa168_device_tslcd, 0, 0); 
+		pxa_register_device(&pxa168_device_tslcd, 0, 0); 
 #endif	   
 	}
 #endif

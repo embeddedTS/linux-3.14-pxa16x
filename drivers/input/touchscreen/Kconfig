@@ -943,4 +943,15 @@ config TOUCHSCREEN_ZFORCE
 	  To compile this driver as a module, choose M here: the
 	  module will be called zforce_ts.
 
+	  
+config TOUCHSCREEN_TSLCD
+   tristate "TS-LCD"
+   depends on MACH_TS47XX
+   help
+      Say Y here if you have the TS-LCD
+ 
+      If unsure, say N.
+ 
+      To compile this driver as a module, choose M here: the
+      module will be called tslcd
 endif

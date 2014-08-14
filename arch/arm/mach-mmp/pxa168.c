@@ -113,6 +113,10 @@ PXA168_DEVICE(fb, "pxa168-fb", -1, LCD, 0xd420b000, 0x1c8);
 PXA168_DEVICE(keypad, "pxa27x-keypad", -1, KEYPAD, 0xd4012000, 0x4c);
 PXA168_DEVICE(eth, "pxa168-eth", -1, MFU, 0xc0800000, 0x0fff);
 
+#ifdef CONFIG_MACH_TS47XX
+PXA168_DEVICE(tslcd, "tslcd-touch", -1, NONE, 0, 0);
+#endif
+
 struct resource pxa168_resource_gpio[] = {
 	{
 		.start	= 0xd4019000,

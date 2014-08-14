@@ -38,6 +38,10 @@ extern struct pxa_device_desc pxa168_device_fb;
 extern struct pxa_device_desc pxa168_device_keypad;
 extern struct pxa_device_desc pxa168_device_eth;
 
+#ifdef CONFIG_MACH_TS47XX
+extern struct pxa_device_desc pxa168_device_tslcd;
+#endif
+
 /* pdata can be NULL */
 extern int __init pxa168_add_usb_host(struct mv_usb_platform_data *pdata);
 
