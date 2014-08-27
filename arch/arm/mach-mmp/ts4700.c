@@ -32,10 +32,6 @@
 #include <plat/pxa2xx_spi.h>
 #endif
 
-#if defined(CONFIG_TOUCHSCREEN_ILI210X) || defined(CONFIG_TOUCHSCREEN_ILI210X_MODULE)
-#include <linux/input/ili210x.h>
-#endif
-
 #include <linux/proc_fs.h>
 #include <linux/irq.h>
 #include <linux/uaccess.h>
@@ -865,37 +861,11 @@ struct pxa168fb_mach_info ts4700_lcd_ovly_info __initdata = {
 };
 #endif
 
-#if defined(CONFIG_TOUCHSCREEN_ILI210X) || defined(CONFIG_TOUCHSCREEN_ILI210X_MODULE)
-static bool ili210x_pendown_state(void)
-{
-   unsigned int pen;
-	pen = mfp_to_gpio(MFP_PIN_GPIO49);
-   gpio_request(pen, "ili210x pendown irq");
-	gpio_direction_input(pen);
-}
-
-static struct ili210x_platform_data ili_info = {
-	.irq_flags =  0,
-	.poll_period = 1,
-	.get_pendown_state	= ili210x_pendown_state,
-};
-#endif
-
 static struct i2c_board_info pwri2c_board_info[] = {
    {
 		.type           = "nothing",
 		.addr           = 0x2a,  //
 	},
-#if defined(CONFIG_TOUCHSCREEN_ILI210X) || defined(CONFIG_TOUCHSCREEN_ILI210X_MODULE)
-
-	{
-	    .type = "ili210x",
-	    .addr = 0x41,
-	    .platform_data = &ili_info,
-	    .irq = IRQ_GPIO(49),
-	},
-	
-#endif	
 #if defined(CONFIG_RTC_DRV_DS1307)
    {
 		.type		= "m41t00",   /* RTC */
@@ -1239,8 +1209,8 @@ static void __init ts4700_init(void)
 #endif
 
 #ifdef CONFIG_USB_OTG
-	pxa168_add_u2ootg(&ts4700_u2o_info);
-	pxa168_add_u2oehci(&ts4700_u2o_info);
+	//pxa168_add_u2ootg(&ts4700_u2o_info);
+	//pxa168_add_u2oehci(&ts4700_u2o_info);
 #endif
 
 
