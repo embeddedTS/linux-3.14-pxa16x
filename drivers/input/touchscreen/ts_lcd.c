@@ -33,7 +33,6 @@
  *
  */
 
-
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/kernel.h>
@@ -207,103 +206,9 @@ static void tslcd_close(struct input_dev *dev)
 
 }
 
-static void sspi_cmd(volatile unsigned short *gpio,unsigned int cmd) {
-  unsigned int i;
-
-  // pulse CS#
-  *gpio = (*gpio & 0xFFF0) | 0x2;
-  *gpio = (*gpio & 0xFFF0) | 0x0;
-
-  for (i = 0; i < 32; i++, cmd <<= 1) {
-    if (cmd & 0x80) {
-      *gpio = (*gpio & 0xFFF0) | 0x4;
-      *gpio = (*gpio & 0xFFF0) | 0xc;
-    } else {
-      *gpio = (*gpio & 0xFFF0) | 0x0;
-      *gpio = (*gpio & 0xFFF0) | 0x8;
-    }
-  }
-}
-
-#define CALIB1_OFFSET 7
-#define CALIB2_OFFSET 8
-static int load_calibration(volatile unsigned short *gpio,
-			     unsigned short *x,unsigned short *dx,
-			     unsigned short *y,unsigned short *dy,
-			     int *xul,int *yul,
-			     int *xur,int *yur,
-			     int *xll,int *yll,
-			     int *xlr,int *ylr) {
-
-  int i,j,ret,n[20],_x,_y,_dx,_dy;
-  int _xul,_yul,_xur,_yur,_xll,_yll,_xlr,_ylr;
-
-  sspi_cmd(gpio,0xac); // X_PROGRAM_EN
-  sspi_cmd(gpio,0x4e); // READ_TAG
-
-  for (j = 0; j < 20; j++) {
-    for (ret = 0x0, i = 0; i < 32; i++) {
-      *gpio = (*gpio & 0xFFF0) | 0x0;
-      *gpio = (*gpio & 0xFFF0) | 0x8;
-      ret = ret << 1 | (*gpio & 0x1);
-    }
-    n[j] = ret;
-
-  }
-
-  sspi_cmd(gpio,0x78); // PROGRAM_DIS
-
-  *gpio = (*gpio & 0xFFF0) | 0x2;
-  _x = n[CALIB1_OFFSET] >> 16;
-  _dx = n[CALIB1_OFFSET] & 0xFFFF;
-  _y = n[CALIB2_OFFSET] >> 16;
-  _dy = n[CALIB2_OFFSET] & 0xFFFF;
-
-  _xul = (short)(n[1+CALIB2_OFFSET] >> 16);
-  _yul = (short)(n[1+CALIB2_OFFSET] & 0xFFFF);
-  _xur = (short)(n[2+CALIB2_OFFSET] >> 16);
-  _yur = (short)(n[2+CALIB2_OFFSET] & 0xFFFF);
-  _xll = (short)(n[3+CALIB2_OFFSET] >> 16);
-  _yll = (short)(n[3+CALIB2_OFFSET] & 0xFFFF);
-  _xlr = (short)(n[4+CALIB2_OFFSET] >> 16);
-  _ylr = (short)(n[4+CALIB2_OFFSET] & 0xFFFF);
-
-  if (!(_xul > 0 || _yul > 0 || _xur > 0 || _yur < 0
-	|| _xll < 0 || _yll > 0 || _xlr < 0 || _ylr < 0)) {
-    *xul = _xul;
-    *yul = _yul;
-    *xur = _xur;
-    *yur = _yur;
-    *xll = _xll;
-    *yll = _yll;
-    *xlr = _xlr;
-    *ylr = _ylr;
-    return 1;
-  }
-
-  if ((_dx < 1 || _dx > 32768) || (_dy < 1 || _dy > 32768)) {
-    return 0; // use defaults
-  }
-  if ((_x < 1 || _x > 32768) || (_y < 1 || _y > 32768)) {
-    return 0; // use defaults
-  }
-  if (_dx == 0) _dx = 4096;
-  if (_dy == 0) _dy = 4096;
-
-  *x = _x;
-  *y = _y;
-  *dx = _dx;
-  *dy = _dy;
-  return 0;
-}
-
-
-
-
 static int __init tslcd_init(void)
 {
   int err;
-  int gpioBase;
   unsigned int baseboard;
   volatile unsigned short *vreg;
 
@@ -318,41 +223,23 @@ static int __init tslcd_init(void)
 
   if (baseboard == 10 || baseboard == 17) {    /* TS-8900 or TS-8920 */
      printk("Baseboard: TS-89XX\n");
-     gpioBase = 0x4004;
      vreg[1] |= BIT(11);      /* Enable the baseboard clock in the 4700's fpga (at 0x80004002) */
      vreg[2] = 0x321;         /* the bus config register */
      tX = vreg + 0x2040;
      tY = vreg + 0x2041;
   }
   else {
-
-     gpioBase = 0x28;
      vreg[1] |= BIT(14);      /* Enable the Touchscreen core in the fpga (at 0x80004002) */
-
      tX = vreg + 0x800;
      tY = vreg + 0x801;
   }
 
-  if (!hardcode) {
-    use_qcalib = load_calibration(vreg+(gpioBase / sizeof(unsigned short)),
-				  &calib_x0,&calib_dx,&calib_y0,&calib_dy,
-				  &qcalib_xul, &qcalib_yul,
-				  &qcalib_xur, &qcalib_yur,
-				  &qcalib_xll, &qcalib_yll,
-				  &qcalib_xlr, &qcalib_ylr);
-  } else use_qcalib = (hardcode == 2);
-  if (use_qcalib) {
-    printk("ts_lcd.c: using quadrilateral calibration\n");
-    printk("ul=%d,%d ur=%d,%d ll=%d,%d lr=%d,%d\n",
-	   qcalib_xul, qcalib_yul,
-	   qcalib_xur, qcalib_yur,
-	   qcalib_xll, qcalib_yll,
-	   qcalib_xlr, qcalib_ylr);
-  } else {
-    printk("ts_lcd.c: using rectangular calibration\n");
-    printk("x calibration: offset=%d, width=%d\n",calib_x0,calib_dx);
-    printk("y calibration: offset=%d, width=%d\n",calib_y0,calib_dy);
-  }
+  printk("ts_lcd.c: using quadrilateral calibration\n");
+  printk("ul=%d,%d ur=%d,%d ll=%d,%d lr=%d,%d\n",
+  qcalib_xul, qcalib_yul,
+  qcalib_xur, qcalib_yur,
+  qcalib_xll, qcalib_yll,
+  qcalib_xlr, qcalib_ylr);
 
   tslcd_dev = input_allocate_device();
   if (!tslcd_dev) {
@@ -363,18 +250,11 @@ static int __init tslcd_init(void)
 
   tslcd_dev->name = "TS-LCD";
   tslcd_dev->phys = "tslcd/input0";
-  //tslcd_dev->id.bustype = BUS_ISA;
-  //tslcd_dev->id.vendor  = 0x0005;
-  //tslcd_dev->id.product = 0x0001;
-  //tslcd_dev->id.version = 0x0100;
 
   tslcd_dev->open    = tslcd_open;
   tslcd_dev->close   = tslcd_close;
 
-
   tslcd_dev->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
-
-  // tslcd_dev->keybit[(long)BTN_TOUCH] = BIT(BTN_TOUCH);   <<<< this is wrong
   tslcd_dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
 
   input_set_abs_params(tslcd_dev, ABS_X, 0, 4096, 0, 0);
@@ -399,9 +279,9 @@ static void __exit tslcd_exit(void)
 
 module_init(tslcd_init);
 module_exit(tslcd_exit);
-module_param(swapxy,int, 0644);
-module_param(negx,int, 0644);
-module_param(negy,int, 0644);
+module_param(swapxy,bool, 0644);
+module_param(negx,bool, 0644);
+module_param(negy,bool, 0644);
 module_param(DEBOUNCE_MS, int, 0644);
 MODULE_PARM_DESC(swapxy, "Swap X/Y axes");
 MODULE_PARM_DESC(negx, "Reverse X axis");
