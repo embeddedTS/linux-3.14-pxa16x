@@ -46,6 +46,7 @@
 #define SMSC95XX_INTERNAL_PHY_ID	(1)
 #define SMSC95XX_TX_OVERHEAD		(8)
 #define SMSC95XX_TX_OVERHEAD_CSUM	(12)
+#define MAC_ADDR_LEN			(6)
 #define SUPPORTED_WAKE			(WAKE_PHY | WAKE_UCAST | WAKE_BCAST | \
 					 WAKE_MCAST | WAKE_ARP | WAKE_MAGIC)
 
@@ -73,6 +74,10 @@ struct smsc95xx_priv {
 static bool turbo_mode = true;
 module_param(turbo_mode, bool, 0644);
 MODULE_PARM_DESC(turbo_mode, "Enable multiple frames per Rx transaction");
+
+static char *macaddr = ":";
+module_param(macaddr, charp, 0);
+MODULE_PARM_DESC(macaddr, "MAC address");
 
 static int __must_check __smsc95xx_read_reg(struct usbnet *dev, u32 index,
 					    u32 *data, int in_pm)
@@ -763,8 +768,53 @@ static int smsc95xx_ioctl(struct net_device *netdev, struct ifreq *rq, int cmd)
 	return generic_mii_ioctl(&dev->mii, if_mii(rq), cmd, NULL);
 }
 
+/* Check the macaddr module parameter for a MAC address */
+static int smsc95xx_is_macaddr_param(struct usbnet *dev, u8 *dev_mac)
+{
+	int i, j, got_num, num;
+	u8 mtbl[MAC_ADDR_LEN];
+
+	if (macaddr[0] == ':')
+		return 0;
+
+	i = 0;
+	j = 0;
+	num = 0;
+	got_num = 0;
+	while (j < MAC_ADDR_LEN) {
+		if (macaddr[i] && macaddr[i] != ':') {
+			got_num++;
+			if ('0' <= macaddr[i] && macaddr[i] <= '9')
+				num = num * 16 + macaddr[i] - '0';
+			else if ('A' <= macaddr[i] && macaddr[i] <= 'F')
+				num = num * 16 + 10 + macaddr[i] - 'A';
+			else if ('a' <= macaddr[i] && macaddr[i] <= 'f')
+				num = num * 16 + 10 + macaddr[i] - 'a';
+			else
+				break;
+			i++;
+		} else if (got_num == 2) {
+			mtbl[j++] = (u8) num;
+			num = 0;
+			got_num = 0;
+			i++;
+		} else {
+			break;
+		}
+	}
+
+	for (i = 0; i < MAC_ADDR_LEN; i++)
+		dev_mac[i] = mtbl[i];
+	return 1;
+}
+
+
 static void smsc95xx_init_mac_address(struct usbnet *dev)
 {
+	/* Check module parameters */
+	if (smsc95xx_is_macaddr_param(dev, dev->net->dev_addr))
+		return;
+	
 	/* try reading mac address from EEPROM */
 	if (smsc95xx_read_eeprom(dev, EEPROM_MAC_OFFSET, ETH_ALEN,
 			dev->net->dev_addr) == 0) {
@@ -915,10 +965,6 @@ static int smsc95xx_reset(struct usbnet *dev)
 		netdev_warn(dev->net, "timeout waiting for PHY Reset\n");
 		return ret;
 	}
-
-	ret = smsc95xx_set_mac_address(dev);
-	if (ret < 0)
-		return ret;
 
 	netif_dbg(dev, ifup, dev->net, "MAC Address: %pM\n",
 		  dev->net->dev_addr);
@@ -1130,6 +1176,9 @@ static int smsc95xx_bind(struct usbnet *dev, struct usb_interface *intf)
 	dev->net->hw_features = NETIF_F_HW_CSUM | NETIF_F_RXCSUM;
 
 	smsc95xx_init_mac_address(dev);
+	ret = smsc95xx_set_mac_address(dev);
+	if (ret < 0)
+		return ret;
 
 	/* Init all registers */
 	ret = smsc95xx_reset(dev);
