@@ -50,4 +50,9 @@
 #define TS47XX_FPGA_PHYS_SIZE  4096
 #endif
 
+#define PXA168_PCIE_PHYS_BASE	0xd1200000
+#define PXA168_PCIE_VIRT_BASE	0xfee00000
+#define PXA168_PCIE_SIZE        SZ_1M
+
+
 #endif /* __ASM_MACH_ADDR_MAP_H */

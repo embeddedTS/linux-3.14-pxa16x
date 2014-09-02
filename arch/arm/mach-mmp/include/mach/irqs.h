@@ -51,6 +51,9 @@
 #define IRQ_PXA168_AP_PMU		60
 #define IRQ_PXA168_SM_INT		63
 
+
+#define IRQ_PXA168_PCIE_CORE  33
+
 /*
  * Interrupt numbers for PXA910
  */

@@ -1450,6 +1450,14 @@ source "drivers/pci/pcie/Kconfig"
 
 source "drivers/pcmcia/Kconfig"
 
+
+config PCI_TS47XX
+	bool "PCIe support on TS471X" if MACH_TS47XX && MIGHT_HAVE_PCI
+	select NEED_MACH_IO_H
+	help
+	   Select this if you want to use the PCIe controller on the
+	   TS-471X boards (PXA168 only, not PXA166).
+
 endmenu
 
 menu "Kernel Features"

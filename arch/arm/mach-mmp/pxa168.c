@@ -115,6 +115,9 @@ PXA168_DEVICE(eth, "pxa168-eth", -1, MFU, 0xc0800000, 0x0fff);
 
 #ifdef CONFIG_MACH_TS47XX
 PXA168_DEVICE(tslcd, "tslcd-touch", -1, NONE, 0, 0);
+#if defined(CONFIG_PCI_TS47XX)
+PXA168_DEVICE(pcie, "pxa168-pcie", -1, PCIE_CORE, 0xd1200000, 0x0FFF);
+#endif
 #endif
 
 struct resource pxa168_resource_gpio[] = {
@@ -182,3 +185,20 @@ void pxa168_restart(enum reboot_mode mode, const char *cmd)
 {
 	soft_restart(0xffff0000);
 }
+
+
+/*****************************************************************************
+ * PCI
+ ****************************************************************************/
+#if defined(CONFIG_PCI) || defined(CONFIG_PCI_TS47XX) 
+extern int getPCIeEnable(void);
+extern void __init pxa168_pcie_init(void);
+static int __init pxa168_db_pci_init(void)
+{
+   if (getPCIeEnable())
+      pxa168_pcie_init();
+
+	return 0;
+}
+device_initcall(pxa168_db_pci_init);
+#endif

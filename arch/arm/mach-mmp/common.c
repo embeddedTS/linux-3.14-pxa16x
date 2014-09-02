@@ -45,12 +45,19 @@ static struct map_desc standard_io_desc[] __initdata = {
       .type    = MT_DEVICE,
    },
 #endif
-	
+   {
+		.pfn		= __phys_to_pfn(PXA168_PCIE_PHYS_BASE),
+		.virtual	= (unsigned long)PXA168_PCIE_VIRT_BASE,
+		.length		= PXA168_PCIE_SIZE,
+		.type		= MT_DEVICE,
+	},
 };
 
 void __init mmp_map_io(void)
 {
-	iotable_init(standard_io_desc, ARRAY_SIZE(standard_io_desc));
+   arch_ioremap_caller = __pxa168_ioremap;
+
+   iotable_init(standard_io_desc, ARRAY_SIZE(standard_io_desc));
 
 	/* this is early, initialize mmp_chip_id here */
 	mmp_chip_id = __raw_readl(MMP_CHIPID);

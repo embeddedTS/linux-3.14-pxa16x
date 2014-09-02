@@ -239,6 +239,14 @@ config MMC_SDHCI_PXAV2
 
 	  If unsure, say N.
 
+config TS47XX_OFFBOARD_MMC
+   bool "TS-471X Offboard MMC support"
+   depends on MACH_TS47XX && MMC
+   help
+     Select this if you have a TS471X board with an off-board eMMC chip.
+     This option will cause the power to the off-board chip to be
+     turned on (if a ts471x board is detected at boot).
+
 config MMC_SDHCI_SPEAR
 	tristate "SDHCI support on ST SPEAr platform"
 	depends on MMC_SDHCI && PLAT_SPEAR

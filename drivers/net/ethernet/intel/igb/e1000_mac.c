@@ -784,7 +784,6 @@ s32 igb_force_mac_fc(struct e1000_hw *hw)
 	 *  other:  No other values should be possible at this point.
 	 */
 	hw_dbg("hw->fc.current_mode = %u\n", hw->fc.current_mode);
-
 	switch (hw->fc.current_mode) {
 	case e1000_fc_none:
 		ctrl &= (~(E1000_CTRL_TFCE | E1000_CTRL_RFCE));

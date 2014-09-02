@@ -76,6 +76,10 @@ static const struct e1000_info *igb_info_tbl[] = {
 	[board_82575] = &e1000_82575_info,
 };
 
+#ifdef CONFIG_MACH_TS47XX
+static char TSOUI[4] = {0x00, 0xd0, 0x69, 0xf7};
+#endif
+
 static DEFINE_PCI_DEVICE_TABLE(igb_pci_tbl) = {
 	{ PCI_VDEVICE(INTEL, E1000_DEV_ID_I354_BACKPLANE_1GBPS) },
 	{ PCI_VDEVICE(INTEL, E1000_DEV_ID_I354_SGMII) },
@@ -112,6 +116,8 @@ static DEFINE_PCI_DEVICE_TABLE(igb_pci_tbl) = {
 	{ PCI_VDEVICE(INTEL, E1000_DEV_ID_82575EB_COPPER), board_82575 },
 	{ PCI_VDEVICE(INTEL, E1000_DEV_ID_82575EB_FIBER_SERDES), board_82575 },
 	{ PCI_VDEVICE(INTEL, E1000_DEV_ID_82575GB_QUAD_COPPER), board_82575 },
+	{ PCI_VDEVICE(INTEL, 0x1532), board_82575 },
+
 	/* required last entry */
 	{0, }
 };
@@ -2260,6 +2266,7 @@ static int igb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	adapter->msg_enable = netif_msg_init(debug, DEFAULT_MSG_ENABLE);
 
 	err = -EIO;
+	/** FYI: pci_iomap(struct pci_dev *dev, int bar, unsigned long maxlen); */	
 	hw->hw_addr = pci_iomap(pdev, 0, 0);
 	if (!hw->hw_addr)
 		goto err_ioremap;
@@ -2279,7 +2286,7 @@ static int igb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	hw->revision_id = pdev->revision;
 	hw->subsystem_vendor_id = pdev->subsystem_vendor;
 	hw->subsystem_device_id = pdev->subsystem_device;
-
+	
 	/* Copy the default MAC, PHY and NVM function pointers */
 	memcpy(&hw->mac.ops, ei->mac_ops, sizeof(hw->mac.ops));
 	memcpy(&hw->phy.ops, ei->phy_ops, sizeof(hw->phy.ops));
@@ -2336,7 +2343,7 @@ static int igb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 				 NETIF_F_IPV6_CSUM |
 				 NETIF_F_SG;
 
-	netdev->priv_flags |= IFF_SUPP_NOFCS;
+   netdev->priv_flags |= IFF_SUPP_NOFCS;
 
 	if (pci_using_dac) {
 		netdev->features |= NETIF_F_HIGHDMA;
@@ -2365,8 +2372,7 @@ static int igb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	case e1000_i211:
 		if (igb_get_flash_presence_i210(hw)) {
 			if (hw->nvm.ops.validate(hw) < 0) {
-				dev_err(&pdev->dev,
-					"The NVM Checksum Is Not Valid\n");
+				dev_err(&pdev->dev,	"The NVM Checksum Is Not Valid\n");
 				err = -EIO;
 				goto err_eeprom;
 			}
@@ -2381,6 +2387,11 @@ static int igb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 		break;
 	}
 
+#ifdef CONFIG_MACH_TS47XX
+   dev_info(&pdev->dev, "Using random mac address\n");
+	eth_hw_addr_random(netdev);
+	memcpy(netdev->dev_addr, TSOUI, sizeof(TSOUI));
+#else
 	/* copy the MAC address out of the NVM */
 	if (hw->mac.ops.read_mac_addr(hw))
 		dev_err(&pdev->dev, "NVM Read Error\n");
@@ -2389,9 +2400,11 @@ static int igb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	if (!is_valid_ether_addr(netdev->dev_addr)) {
 		dev_err(&pdev->dev, "Invalid MAC Address\n");
-		err = -EIO;
-		goto err_eeprom;
+
+		dev_info(&pdev->dev, "Using random mac address\n");
+		eth_hw_addr_random(netdev);
 	}
+#endif
 
 	/* get firmware version for ethtool -i */
 	igb_set_fw_version(adapter);
@@ -6135,10 +6148,32 @@ static irqreturn_t igb_intr(int irq, void *data)
 	struct igb_adapter *adapter = data;
 	struct igb_q_vector *q_vector = adapter->q_vector[0];
 	struct e1000_hw *hw = &adapter->hw;
+	u32 icr;
+
+#if defined(CONFIG_MACH_TS47XX)
+	/* TODO: Hack alert!! Fix it!
+	 * Clears the interrupts on the PCIe controller
+	 * Should this be a call back into
+	 * arch/arm/mach-mmp/pxa168_pcie.c?
+	 */
+	   u32 stat = __raw_readl((volatile void*)0xfee01820);
+
+	   /* Clear interrupts only TLP de-assert message */
+	   /* TODO: Optimize it */
+	   if (stat & 0x2)
+	      __raw_writel((stat & 0x3), (volatile void*)0xfee01820);
+	   if (stat & 0x8)
+	      __raw_writel((stat & 0xC), (volatile void*)0xfee01820);
+	   if (stat & 0x20)
+	      __raw_writel((stat & 0x30), (volatile void*)0xfee01820);
+	   if (stat & 0x80)
+	      __raw_writel((stat & 0xC0), (volatile void*)0xfee01820);
+#endif
+
 	/* Interrupt Auto-Mask...upon reading ICR, interrupts are masked.  No
 	 * need for the IMC write
 	 */
-	u32 icr = rd32(E1000_ICR);
+	icr = rd32(E1000_ICR);
 
 	/* IMS will not auto-mask if INT_ASSERTED is not set, and if it is
 	 * not set, then the adapter didn't send an interrupt

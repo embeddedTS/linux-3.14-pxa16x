@@ -1,4 +1,7 @@
 #ifndef __ASM_MACH_HARDWARE_H
 #define __ASM_MACH_HARDWARE_H
 
+#define PXA168_PCIE_MAX_MEM (0x80000000-1)
+
+
 #endif /* __ASM_MACH_HARDWARE_H */

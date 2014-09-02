@@ -9,6 +9,8 @@ extern void __init pxa168_init_irq(void);
 extern void pxa168_restart(enum reboot_mode, const char *);
 extern void pxa168_clear_keypad_wakeup(void);
 
+
+
 #include <linux/i2c.h>
 #include <linux/i2c/pxa-i2c.h>
 #include <mach/devices.h>
@@ -18,6 +20,10 @@ extern void pxa168_clear_keypad_wakeup(void);
 #include <mach/cputype.h>
 #include <linux/pxa168_eth.h>
 #include <linux/platform_data/mv_usb.h>
+
+#ifdef CONFIG_PCI_TS47XX
+#include <mach/pxa168_pcie.h>
+#endif
 
 extern struct pxa_device_desc pxa168_device_uart1;
 extern struct pxa_device_desc pxa168_device_uart2;
@@ -40,6 +46,7 @@ extern struct pxa_device_desc pxa168_device_eth;
 
 #ifdef CONFIG_MACH_TS47XX
 extern struct pxa_device_desc pxa168_device_tslcd;
+extern struct pxa_device_desc pxa168_device_pcie;
 #endif
 
 /* pdata can be NULL */
@@ -142,6 +149,12 @@ static inline int pxa168_add_eth(struct pxa168_eth_platform_data *data)
 
 #ifdef CONFIG_MACH_TS47XX
 extern void ts4700_init_mux_irq(void);
+#ifdef CONFIG_PCI_TS47XX
+static inline int pxa168_add_pcie(struct pxa168_pcie_platform_data *data)
+{
+	return pxa_register_device(&pxa168_device_pcie, data, sizeof(*data));
+}
+#endif
 #endif
 
 

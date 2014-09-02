@@ -192,7 +192,6 @@ static s32 igb_init_phy_params_82575(struct e1000_hw *hw)
 		phy->ops.reset = igb_phy_hw_reset;
 		ctrl_ext &= ~E1000_CTRL_I2C_ENA;
 	}
-
 	wr32(E1000_CTRL_EXT, ctrl_ext);
 	igb_reset_mdicnfg_82580(hw);
 
@@ -574,9 +573,11 @@ static s32 igb_get_invariants_82575(struct e1000_hw *hw)
 	case E1000_DEV_ID_I210_SGMII:
 	case E1000_DEV_ID_I210_COPPER_FLASHLESS:
 	case E1000_DEV_ID_I210_SERDES_FLASHLESS:
+	case 0x1532:
 		mac->type = e1000_i210;
 		break;
 	case E1000_DEV_ID_I211_COPPER:
+	case 0x1531:
 		mac->type = e1000_i211;
 		break;
 	case E1000_DEV_ID_I354_BACKPLANE_1GBPS:
@@ -683,7 +684,6 @@ static s32 igb_get_invariants_82575(struct e1000_hw *hw)
 
 	/* setup PHY parameters */
 	ret_val = igb_init_phy_params_82575(hw);
-
 out:
 	return ret_val;
 }
@@ -820,6 +820,7 @@ static s32 igb_get_phy_id_82575(struct e1000_hw *hw)
 	 */
 	if (!(igb_sgmii_active_82575(hw))) {
 		phy->addr = 1;
+
 		ret_val = igb_get_phy_id(hw);
 		goto out;
 	}
@@ -1101,7 +1102,6 @@ static s32 igb_acquire_nvm_82575(struct e1000_hw *hw)
 		goto out;
 
 	ret_val = igb_acquire_nvm(hw);
-
 	if (ret_val)
 		hw->mac.ops.release_swfw_sync(hw, E1000_SWFW_EEP_SM);
 
@@ -1491,14 +1491,14 @@ static s32 igb_init_hw_82575(struct e1000_hw *hw)
 	struct e1000_mac_info *mac = &hw->mac;
 	s32 ret_val;
 	u16 i, rar_count = mac->rar_entry_count;
-
+#if (0)
 	if ((hw->mac.type >= e1000_i210) &&
 	    !(igb_get_flash_presence_i210(hw))) {
 		ret_val = igb_pll_workaround_i210(hw);
 		if (ret_val)
 			return ret_val;
 	}
-
+#endif
 	/* Initialize identification LED */
 	ret_val = igb_id_led_init(hw);
 	if (ret_val) {

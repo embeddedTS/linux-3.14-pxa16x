@@ -36,3 +36,4 @@ obj-$(CONFIG_MACH_TETON_BGA)	+= teton_bga.o
 obj-$(CONFIG_MACH_GPLUGD)	+= gplugd.o
 obj-$(CONFIG_MACH_TS47XX)	+= ts4700.o ts4700_mux_irq.o
 
+obj-$(CONFIG_PCI_TS47XX)		+= pcie-old/

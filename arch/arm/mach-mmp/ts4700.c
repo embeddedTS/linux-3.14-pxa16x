@@ -27,6 +27,8 @@
 #include <mach/irqs.h>
 #include <mach/mfp-pxa168.h>
 
+#include <asm/gpio.h>
+
 #if defined(CONFIG_SPI_PXA2XX)
 #include <linux/spi/spi.h>
 #include <plat/pxa2xx_spi.h>
@@ -38,6 +40,7 @@
 #include <linux/poll.h>
 
 #include "common.h"
+#define NR_BUILTIN_GPIO 128
 /*used by expander max7312, 16 pins gpio expander */
 #define GPIO_EXT0(x)		(NR_BUILTIN_GPIO + (x))
 #define GPIO_EXT1(x)		(NR_BUILTIN_GPIO + 16 + (x))
