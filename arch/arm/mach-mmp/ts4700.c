@@ -29,13 +29,18 @@
 
 #include <asm/gpio.h>
 
+
+
 #if defined(CONFIG_SPI_PXA2XX)
 #include <linux/spi/spi.h>
 #include <plat/pxa2xx_spi.h>
 #endif
 
 #include <linux/proc_fs.h>
+#include <../fs/proc/internal.h>
+
 #include <linux/irq.h>
+#include <linux/irqdesc.h>
 #include <linux/uaccess.h>
 #include <linux/poll.h>
 
@@ -913,7 +918,7 @@ static irqreturn_t irq_proc_irq_handler(int irq, void *vidp)
    return IRQ_HANDLED;
 }
 
-#if (0)  //FIX ME!
+#if (1)  //FIX ME!
 /*
  * Signal to userspace an interrupt has occured.
  */
@@ -930,7 +935,7 @@ static ssize_t irq_proc_read(struct file *filp, char  __user *bufp, size_t len, 
 
    pending = atomic_read(&ip->count);
    if (pending == 0) {
-      if (idp->status & IRQ_DISABLED)
+      if (idp->status_use_accessors & IRQD_IRQ_DISABLED)
          enable_irq(ip->irq);
       if (filp->f_flags & O_NONBLOCK)
          return -EWOULDBLOCK;
@@ -1005,7 +1010,7 @@ static unsigned int irq_proc_poll(struct file *filp, struct poll_table_struct *w
       return POLLIN | POLLRDNORM; /* readable */
 
    /* if interrupts disabled and we don't have one to process... */
-   if (idp->status & IRQ_DISABLED)
+   if (idp->status_use_accessors & IRQD_IRQ_DISABLED)
       enable_irq(ip->irq);
 
    poll_wait(filp, &ip->q, wait);
@@ -1248,13 +1253,13 @@ static void __init ts4700_init(void)
 	}
 #endif
 
-	//ts4700_create_proc_irq();
+	ts4700_create_proc_irq();
 }
 
 
 MACHINE_START(TS47XX, "ts471x board")
 	.map_io		= mmp_map_io,
-	.nr_irqs	= MMP_NR_IRQS,
+	.nr_irqs	= NR_IRQS,
 	.init_irq       = pxa168_init_irq,
 	.init_time	= pxa168_timer_init,
 	.init_machine   = ts4700_init,

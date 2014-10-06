@@ -592,11 +592,11 @@ config ARCH_MMP
 	select IRQ_DOMAIN
 	select MULTI_IRQ_HANDLER
 	select PINCTRL
-	select PLAT_PXA
-	select SPARSE_IRQ
+	select PLAT_PXA	
 	help
 	  Support for Marvell's PXA168/PXA910(MMP) and MMP2 processor line.
 
+	  
 config ARCH_KS8695
 	bool "Micrel/Kendin KS8695"
 	select ARCH_REQUIRE_GPIOLIB
