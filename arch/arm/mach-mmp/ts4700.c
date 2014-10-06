@@ -935,7 +935,7 @@ static ssize_t irq_proc_read(struct file *filp, char  __user *bufp, size_t len, 
 
    pending = atomic_read(&ip->count);
    if (pending == 0) {
-      if (idp->status_use_accessors & IRQD_IRQ_DISABLED)
+      if (irqd_irq_disabled(&idp->irq_data))
          enable_irq(ip->irq);
       if (filp->f_flags & O_NONBLOCK)
          return -EWOULDBLOCK;
@@ -1010,7 +1010,7 @@ static unsigned int irq_proc_poll(struct file *filp, struct poll_table_struct *w
       return POLLIN | POLLRDNORM; /* readable */
 
    /* if interrupts disabled and we don't have one to process... */
-   if (idp->status_use_accessors & IRQD_IRQ_DISABLED)
+   if (irqd_irq_disabled(&idp->irq_data))
       enable_irq(ip->irq);
 
    poll_wait(filp, &ip->q, wait);
