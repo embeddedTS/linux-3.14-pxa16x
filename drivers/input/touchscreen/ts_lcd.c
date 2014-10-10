@@ -230,16 +230,24 @@ static int __init tslcd_init(void)
   }
   else {
      vreg[1] |= BIT(14);      /* Enable the Touchscreen core in the fpga (at 0x80004002) */
+
      tX = vreg + 0x800;
      tY = vreg + 0x801;
   }
 
-  printk("ts_lcd.c: using quadrilateral calibration\n");
-  printk("ul=%d,%d ur=%d,%d ll=%d,%d lr=%d,%d\n",
-  qcalib_xul, qcalib_yul,
-  qcalib_xur, qcalib_yur,
-  qcalib_xll, qcalib_yll,
-  qcalib_xlr, qcalib_ylr);
+  use_qcalib = (hardcode == 2);
+  if (use_qcalib) {
+    printk("ts_lcd.c: using quadrilateral calibration\n");
+    printk("ul=%d,%d ur=%d,%d ll=%d,%d lr=%d,%d\n",
+	   qcalib_xul, qcalib_yul,
+	   qcalib_xur, qcalib_yur,
+	   qcalib_xll, qcalib_yll,
+	   qcalib_xlr, qcalib_ylr);
+  } else {
+    printk("ts_lcd.c: using rectangular calibration\n");
+    printk("x calibration: offset=%d, width=%d\n",calib_x0,calib_dx);
+    printk("y calibration: offset=%d, width=%d\n",calib_y0,calib_dy);
+  }
 
   tslcd_dev = input_allocate_device();
   if (!tslcd_dev) {
