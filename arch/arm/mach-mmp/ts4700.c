@@ -7,7 +7,6 @@
  *  it under the terms of the GNU General Public License version 2 as
  *  publishhed by the Free Software Foundation.
  */
-
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
@@ -29,6 +28,8 @@
 
 #include <asm/gpio.h>
 
+#include <plat/pxa_u2o.h>
+#include <plat/pxa3xx_otg.h>
 
 
 #if defined(CONFIG_SPI_PXA2XX)
@@ -666,6 +667,19 @@ struct otg_pmic_ops *init_ts4700_otg_ops(void)
 	return &ts4700_otg_ops;
 }
 
+/*
+static struct mv_usb_platform_data ts4700_usb_pdata = {
+	.vbus		= NULL,
+	.mode		= MV_USB_MODE_OTG,
+	.otg_force_a_bus_req = 1,
+	.phy_init	= pxa_usb_phy_init,
+	.phy_deinit	= pxa_usb_phy_deinit,
+	.set_vbus	= NULL,
+};
+*/
+
+
+#if (1)
 static struct pxa_usb_plat_info ts4700_u2o_info = {
 	.phy_init	= pxa168_usb_phy_init,
 	.phy_deinit	= pxa168_usb_phy_deinit,
@@ -673,12 +687,13 @@ static struct pxa_usb_plat_info ts4700_u2o_info = {
 	.vbus_status	= ts4700_u2o_vbus_status,
 	.vbus_detect    = ts4700_u2o_vbus_detect,
 	.init_pmic_ops	= (void*)init_ts4700_otg_ops,
-#ifdef CONFIG_USB_OTG
-	.is_otg		= 1,
-#else
+//#ifdef CONFIG_USB_OTG
+	//.is_otg		= 1,
+//#else
 	.clk_gating	= 1,
-#endif
+//#endif
 };
+#endif
 #endif
 
 #ifdef CONFIG_USB_EHCI_PXA_U2H
@@ -869,6 +884,7 @@ struct pxa168fb_mach_info ts4700_lcd_ovly_info __initdata = {
 };
 #endif
 
+/** FYI: The "pwri2c" refers to the pxa168 PWR_TWSI, which is pxa2xx-i2c.1 */
 static struct i2c_board_info pwri2c_board_info[] = {
    {
 		.type           = "nothing",
@@ -876,8 +892,8 @@ static struct i2c_board_info pwri2c_board_info[] = {
 	},
 #if defined(CONFIG_RTC_DRV_DS1307)
    {
-		.type		= "m41t00",   /* RTC */
-		.addr      = (0xd0 >> 1),
+		.type	= "m41t00",   /* RTC */
+		.addr = (0xd0 >> 1),
 	},
 #endif
 
@@ -885,16 +901,25 @@ static struct i2c_board_info pwri2c_board_info[] = {
    /* HDMI baseboard support (for boards with SII9022 HDMI Transmitter) */
 	{
 	   .type = "sii9022",
-      .addr = 0x39,
+      .addr = (0x72 >> 1),
       .platform_data = NULL,
    },
    
 #endif
 
+#if defined (CONFIG_SND_SOC_SGTL5000) || defined(CONFIG_SND_SOC_SGTL5000_MODULE)
+   {
+      .type = "sgtl5000",  /* audio codec, has i2c control interface */
+      .addr = (0x14 >> 1),
+      .platform_data = NULL,
+   },
+#endif   
 };
 
 static struct i2c_pxa_platform_data pwri2c_info __initdata = {
-	.use_pio		= 1,
+	.use_pio	= 1,
+	.fast_mode = 1,	/* "fast" as in 400 kbit/s */
+	.rate = 400000,
 };
 
 
@@ -1140,6 +1165,31 @@ static struct mv_usb_platform_data pxa168_sph_pdata = {
 #endif
 
 
+struct platform_device ts47xx_audio = {
+	.name		= "ts47xx-audio",
+	.id		= -1,
+};
+
+static void __init ts47xx_init_audio(void)
+{
+	platform_device_register(&ts47xx_audio);
+}
+
+
+#ifdef CONFIG_USB_SUPPORT
+#if defined(CONFIG_USB_MV_UDC) || defined(CONFIG_USB_EHCI_MV_U2O)
+static struct mv_usb_platform_data ts471x_usb_pdata = {
+	.vbus		= NULL,
+	.mode		= MV_USB_MODE_HOST,
+	.otg_force_a_bus_req = 1,
+	.phy_init	= pxa_usb_phy_init,
+	.phy_deinit	= pxa_usb_phy_deinit,
+	.set_vbus	= NULL,
+};
+#endif
+#endif
+
+
 static void __init ts4700_init(void)
 {   
 	int baseboardHasLCD;
@@ -1147,7 +1197,7 @@ static void __init ts4700_init(void)
 
 	mfp_config(ARRAY_AND_SIZE(ts4700_pin_config));
 	pxa168_add_uart(1);
-	
+		
 	model = peek16(0x0);
 	switch (model) {
 	case 0x4700:
@@ -1208,19 +1258,30 @@ static void __init ts4700_init(void)
 	/* on-chip devices */
 
 	pxa168_add_eth(&pxa168_eth_data);
-	
-	pxa168_add_ssp(0);
+		
+	pxa168_add_ssp(1);   /* 1 == ssp0, in Marvell's twisted logic */
 	pxa168_add_twsi(1, &pwri2c_info, ARRAY_AND_SIZE(pwri2c_board_info));
 
-#ifdef CONFIG_USB_GADGET_PXA_U2O
-	pxa168_add_u2o(&ts4700_u2o_info);
+  
+#ifdef CONFIG_USB_MV_UDC
+	pxa168_device_u2o.dev.platform_data = &ts471x_usb_pdata;
+	platform_device_register(&pxa168_device_u2o);
 #endif
 
-#ifdef CONFIG_USB_OTG
-	//pxa168_add_u2ootg(&ts4700_u2o_info);
-	//pxa168_add_u2oehci(&ts4700_u2o_info);
+#ifdef CONFIG_USB_EHCI_MV_U2O
+	pxa168_device_u2oehci.dev.platform_data = &ts471x_usb_pdata;
+	platform_device_register(&pxa168_device_u2oehci);
 #endif
 
+#ifdef CONFIG_USB_MV_OTG
+	pxa168_device_u2ootg.dev.platform_data = &ts471x_usb_pdata;
+	platform_device_register(&pxa168_device_u2ootg);	
+#endif
+
+
+#if defined(CONFIG_USB_EHCI_MV)
+	pxa168_add_usb_host(&pxa168_sph_pdata);
+#endif
 
 #if defined(CONFIG_PCI) || defined(CONFIG_PCI_TS47XX)
 	if (enable_pcie) {
@@ -1231,9 +1292,6 @@ static void __init ts4700_init(void)
 	}
 #endif
 
-#if defined(CONFIG_USB_EHCI_MV)
-	pxa168_add_usb_host(&pxa168_sph_pdata);
-#endif
 
 
 #if defined(CONFIG_MMC_PXA_SDH) || defined(CONFIG_MMC_PXA_SDH_MODULE)
@@ -1245,13 +1303,14 @@ static void __init ts4700_init(void)
 #if (defined(CONFIG_FB_PXA168_OLD) || defined(CONFIG_FB_PXA168_OLD_MODULE) || defined(CONFIG_FB_PXA168) || defined(CONFIG_FB_PXA168_MODULE))	
 	if (baseboardHasLCD) {
 		pxa168_add_fb(&ts4700_lcd_info);
-		//pxa168_add_fb_ovly(&ts4700_lcd_ovly_info);
 
 #if (defined(CONFIG_TOUCHSCREEN_TSLCD) || defined(CONFIG_TOUCHSCREEN_TSLCD_MODULE))
 		pxa_register_device(&pxa168_device_tslcd, 0, 0); 
 #endif	   
 	}
 #endif
+
+   ts47xx_init_audio();
 
 	ts4700_create_proc_irq();
 }

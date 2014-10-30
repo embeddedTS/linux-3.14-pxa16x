@@ -60,6 +60,10 @@ static APMU_CLK(lcd, LCD, 0x7f, 312000000);
 static APMU_CLK(eth, ETH, 0x09, 0);
 static APMU_CLK(usb, USB, 0x12, 0);
 
+
+static APMU_CLK_OPS(u2o, USB, 480000000, &u2o_clk_ops);	/* 480MHz, AXICLK */
+static APMU_CLK_OPS(u2h, USB, 480000000, &u2h_clk_ops);	/* 480MHz, AXICLK */
+
 /* device and clock bindings */
 static struct clk_lookup pxa168_clkregs[] = {
 	INIT_CLKREG(&clk_uart1, "pxa2xx-uart.0", NULL),
@@ -83,9 +87,16 @@ static struct clk_lookup pxa168_clkregs[] = {
 	INIT_CLKREG(&clk_eth, "pxa168-eth", "MFUCLK"),
 	INIT_CLKREG(&clk_usb, NULL, "PXA168-USBCLK"),
 	INIT_CLKREG(&clk_rtc, "sa1100-rtc", NULL),
+	
+	INIT_CLKREG(&clk_u2o, "pxa-u2oehci", NULL),
+	INIT_CLKREG(&clk_u2h, "pxa-sph", NULL),
+
+	
+
 };
 
-void __init pxa168_clk_init(void)
+void __init _pxa168_clk_init(void)
 {
+   printk("%s %d\n", __func__, __LINE__);
 	clkdev_add_table(ARRAY_AND_SIZE(pxa168_clkregs));
 }

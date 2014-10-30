@@ -104,6 +104,10 @@ void __init pxa168_clk_init(void)
 				624000000);
 	clk_register_clkdev(clk, "pll1", NULL);
 
+	clk = clk_register_fixed_rate(NULL, "usb_pll", NULL, CLK_IS_ROOT,
+				480000000);
+	clk_register_clkdev(clk, "usb_pll", NULL);
+	
 	clk = clk_register_fixed_factor(NULL, "pll1_2", "pll1",
 				CLK_SET_RATE_PARENT, 1, 2);
 	clk_register_clkdev(clk, "pll1_2", NULL);
@@ -315,13 +319,14 @@ void __init pxa168_clk_init(void)
 #endif
 
 	clk = mmp_clk_register_apmu("usb", "usb_pll", apmu_base + APMU_USB,
-				0x9, &clk_lock);
-	clk_register_clkdev(clk, "usb_clk", NULL);
-
+			0x9, &clk_lock);   /* 0x9 enables the "USB OTG Controller" clk */
+	clk_register_clkdev(clk, "usb_clk", NULL);	
+	clk_register_clkdev(clk, NULL, "pxa-u2oehci");
+	
 	clk = mmp_clk_register_apmu("sph", "usb_pll", apmu_base + APMU_USB,
-				0x12, &clk_lock);
+				0x12, &clk_lock); /* 0x12 enables the "USB Host Controller" clk */
 	clk_register_clkdev(clk, NULL, "pxa-sph");
-
+		
 	clk = clk_register_mux(NULL, "disp0_mux", disp_parent,
 				ARRAY_SIZE(disp_parent),
 				CLK_SET_RATE_PARENT | CLK_SET_RATE_NO_REPARENT,

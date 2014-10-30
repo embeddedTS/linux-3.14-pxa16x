@@ -3,6 +3,9 @@
 
 #include <linux/reboot.h>
 
+#include <plat/pxa_u2o.h>
+
+
 extern void pxa168_timer_init(void);
 extern void __init icu_init_irq(void);
 extern void __init pxa168_init_irq(void);
@@ -50,7 +53,7 @@ extern struct pxa_device_desc pxa168_device_pcie;
 #endif
 
 /* pdata can be NULL */
-extern int __init pxa168_add_usb_host(struct mv_usb_platform_data *pdata);
+
 
 
 extern struct platform_device pxa168_device_gpio;
@@ -71,19 +74,63 @@ static inline int pxa168_add_uart(int id)
 	return pxa_register_device(d, NULL, 0);
 }
 
+
+static inline int pxa168_add_u2o(void *data)
+{
+   printk("%s %d\n", __func__, __LINE__);
+	pxa168_device_u2o.dev.platform_data = data;
+	return platform_device_register(&pxa168_device_u2o);
+}
+
+static inline int pxa168_add_u2h(struct pxa_usb_plat_info *info)
+{
+   printk("%s %d\n", __func__, __LINE__);
+	pxa168_device_u2h.dev.platform_data = info;
+	return platform_device_register(&pxa168_device_u2h);
+}
+
+static inline int pxa168_add_u2ootg(struct pxa_usb_plat_info *info)
+{
+   printk("%s %d\n", __func__, __LINE__);
+	pxa168_device_u2ootg.dev.platform_data = info;
+	return platform_device_register(&pxa168_device_u2ootg);
+}
+
+static inline int pxa168_add_u2oehci(struct pxa_usb_plat_info *info)
+{
+   printk("%s %d\n", __func__, __LINE__);
+	pxa168_device_u2oehci.dev.platform_data = info;
+	return platform_device_register(&pxa168_device_u2oehci);
+}
+
+
+static inline int pxa168_add_usb_host(struct mv_usb_platform_data *pdata)
+{
+	pxa168_device_usb_host.dev.platform_data = pdata;
+	return platform_device_register(&pxa168_device_usb_host);
+}
+
+
 static inline int pxa168_add_twsi(int id, struct i2c_pxa_platform_data *data,
 				  struct i2c_board_info *info, unsigned size)
 {
 	struct pxa_device_desc *d = NULL;
 	int ret;
-
+   unsigned long x;
+	volatile unsigned long *ptr = MPMU_REG(0x1024);
+	    
 	switch (id) {
 	case 0: d = &pxa168_device_twsi0; break;
 	case 1: d = &pxa168_device_twsi1; break;
 	default:
 		return -EINVAL;
 	}
-
+		
+	/* probably not the best place for this... */
+   x = *ptr;
+   x |= (1 << 6);    /* enable AP_I2C in the clock-gating register */
+   *ptr = x;
+	
 	ret = i2c_register_board_info(id, info, size);
 	if (ret)
 		return ret;
@@ -157,5 +204,13 @@ static inline int pxa168_add_pcie(struct pxa168_pcie_platform_data *data)
 #endif
 #endif
 
+
+extern unsigned u2o_get(unsigned base, unsigned offset);
+extern void u2o_set(unsigned base, unsigned offset, unsigned value);
+extern void u2o_clear(unsigned base, unsigned offset, unsigned value);
+extern void u2o_write(unsigned base, unsigned offset, unsigned value);
+
+extern int pxa168_usb_phy_init(void __iomem *base);
+extern int pxa168_usb_phy_deinit(void __iomem *base);
 
 #endif /* __ASM_MACH_PXA168_H */

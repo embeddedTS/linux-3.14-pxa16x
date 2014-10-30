@@ -53,4 +53,9 @@ extern int pxa_register_device(struct pxa_device_desc *, void *, size_t);
 extern int pxa_usb_phy_init(void __iomem *phy_reg);
 extern void pxa_usb_phy_deinit(void __iomem *phy_reg);
 
+extern struct platform_device pxa168_device_u2o;
+extern struct platform_device pxa168_device_u2h;
+extern struct platform_device pxa168_device_u2ootg;
+extern struct platform_device pxa168_device_u2oehci;
+extern struct platform_device pxa168_device_usb_host;
 #endif /* __MACH_DEVICE_H */

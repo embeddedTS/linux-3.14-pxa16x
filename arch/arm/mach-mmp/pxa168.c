@@ -140,46 +140,8 @@ struct platform_device pxa168_device_gpio = {
 	.resource	= pxa168_resource_gpio,
 };
 
-struct resource pxa168_usb_host_resources[] = {
-	/* USB Host conroller register base */
-	[0] = {
-		.start	= PXA168_U2H_REGBASE + U2x_CAPREGS_OFFSET,
-		.end	= PXA168_U2H_REGBASE + USB_REG_RANGE,
-		.flags	= IORESOURCE_MEM,
-		.name	= "capregs",
-	},
-	/* USB PHY register base */
-	[1] = {
-		.start	= PXA168_U2H_PHYBASE,
-		.end	= PXA168_U2H_PHYBASE + USB_PHY_RANGE,
-		.flags	= IORESOURCE_MEM,
-		.name	= "phyregs",
-	},
-	[2] = {
-		.start	= IRQ_PXA168_USB2,
-		.end	= IRQ_PXA168_USB2,
-		.flags	= IORESOURCE_IRQ,
-	},
-};
 
-static u64 pxa168_usb_host_dmamask = DMA_BIT_MASK(32);
-struct platform_device pxa168_device_usb_host = {
-	.name = "pxa-sph",
-	.id   = -1,
-	.dev  = {
-		.dma_mask = &pxa168_usb_host_dmamask,
-		.coherent_dma_mask = DMA_BIT_MASK(32),
-	},
 
-	.num_resources = ARRAY_SIZE(pxa168_usb_host_resources),
-	.resource      = pxa168_usb_host_resources,
-};
-
-int __init pxa168_add_usb_host(struct mv_usb_platform_data *pdata)
-{
-	pxa168_device_usb_host.dev.platform_data = pdata;
-	return platform_device_register(&pxa168_device_usb_host);
-}
 
 void pxa168_restart(enum reboot_mode mode, const char *cmd)
 {
