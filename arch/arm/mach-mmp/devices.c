@@ -234,28 +234,11 @@ int pxa168_usb_phy_init(void __iomem *base)
 {	
 	static int init_done;
 	int count;
-printk("%s %d\n", __func__, __LINE__);
+
 	if (init_done) {
 		printk(KERN_DEBUG "re-init phy\n\n");
 		/* return; */
 	}
-
-	/* enable the pull up 
-	if (cpu_is_pxa910_z0()) {
-		if (cpu_is_pxa910()) {
-			u32 U2H_UTMI_CTRL = 
-				(u32)ioremap_nocache(0xc0000004, 4);
-			writel(1<<20, U2H_UTMI_CTRL);
-		}
-	}
-	*/
-	
-	/* Initialize the USB PHY power 
-	if (cpu_is_pxa910()) {
-		u2o_set(base, UTMI_CTRL, (1<<UTMI_CTRL_INPKT_DELAY_SOF_SHIFT)
-			| (1<<UTMI_CTRL_PU_REF_SHIFT));
-	}
-	*/
 
 	u2o_set(base, UTMI_CTRL, 1<<UTMI_CTRL_PLL_PWR_UP_SHIFT);
 	u2o_set(base, UTMI_CTRL, 1<<UTMI_CTRL_PWR_UP_SHIFT);
