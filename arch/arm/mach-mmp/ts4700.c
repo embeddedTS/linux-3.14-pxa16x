@@ -29,7 +29,6 @@
 #include <asm/gpio.h>
 
 #include <plat/pxa_u2o.h>
-#include <plat/pxa3xx_otg.h>
 
 
 #if defined(CONFIG_SPI_PXA2XX)
