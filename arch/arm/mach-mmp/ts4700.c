@@ -869,18 +869,6 @@ struct pxa168fb_mach_info ts4700_lcd_info __initdata = {
 	.panel_rgb_reverse_lanes = 0,
 	.invert_pix_val_ena = 0,
 };
-
-struct pxa168fb_mach_info ts4700_lcd_ovly_info __initdata = {
-	.id                     = "Graphic Ovly",
-	.modes                  = video_modes,
-	.num_modes              = ARRAY_SIZE(video_modes),
-	.pix_fmt                = PIX_FMT_RGB888PACK,
-	.io_pin_allocation_mode = PIN_MODE_DUMB_24,
-	.dumb_mode              = DUMB_MODE_RGB888,
-	.active                 = 1,
-	.panel_rbswap		       = 1,
-	.invert_pixclock        = 0,
-};
 #endif
 
 /** FYI: The "pwri2c" refers to the pxa168 PWR_TWSI, which is pxa2xx-i2c.1 */
@@ -1237,6 +1225,8 @@ static void __init ts4700_init(void)
 	switch(tsBaseBoard) {
 	case 17:     /* TS-8920*/
 	case 10:    /* TS-8900 */
+		ts4700_lcd_info.modes = &ts4700_lcd_info.modes[1];
+		ts4700_lcd_info.num_modes = 1;
 	case 5:     /* TS-8400 */	
 #if (defined(CONFIG_FB_PXA168_OLD) ||  \
      defined(CONFIG_FB_PXA168_OLD_MODULE) || \
