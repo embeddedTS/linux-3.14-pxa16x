@@ -63,7 +63,7 @@ static struct clk_factor_tbl uart_factor_tbl[] = {
 static const char *uart_parent[] = {"pll1_3_16", "uart_pll"};
 static const char *ssp_parent[] = {"pll1_96", "pll1_48", "pll1_24", "pll1_12"};
 static const char *sdh_parent[] = {"pll1_12", "pll1_13"};
-static const char *disp_parent[] = {"pll1_2", "pll1_12"};
+static const char *disp_parent[] = {"pll1", "pll1_2"};
 static const char *ccic_parent[] = {"pll1_2", "pll1_12"};
 static const char *ccic_phy_parent[] = {"pll1_6", "pll1_12"};
 
