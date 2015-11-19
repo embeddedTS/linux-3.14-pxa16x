@@ -7,6 +7,7 @@
 struct pxa168_eth_platform_data {
 	int	port_number;
 	int	phy_addr;
+	u16		force_phy_addr;	/* force override if phy_addr == 0 */
 
 	/*
 	 * If speed is 0, then speed and duplex are autonegotiated.
@@ -25,6 +26,7 @@ struct pxa168_eth_platform_data {
 	 * e.g on Aspenite its used to initialize the PHY transceiver.
 	 */
 	int (*init)(void);
+	u8		mac_addr[6];	/* mac address if non-zero*/
 };
 
 #endif /* __LINUX_PXA168_ETH_H */
