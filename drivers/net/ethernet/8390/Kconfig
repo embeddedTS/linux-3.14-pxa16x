@@ -30,6 +30,7 @@ config PCMCIA_AXNET
 	  To compile this driver as a module, choose M here: the module will be
 	  called axnet_cs.  If unsure, say N.
 
+
 config AX88796
 	tristate "ASIX AX88796 NE2000 clone support"
 	depends on (ARM || MIPS || SUPERH)
@@ -40,9 +41,17 @@ config AX88796
 	  AX88796 driver, using platform bus to provide
 	  chip detection and resources
 
+config AX88796B
+   tristate "ASIX ax88796b support"
+   depends on (MACH_TS47XX)
+   select CRC32
+	select MII
+   ---help---
+     Support for ASIX ax88796b on Technologic Systems peripheral boards
+
 config AX88796_93CX6
 	bool "ASIX AX88796 external 93CX6 eeprom support"
-	depends on AX88796
+	depends on (AX88796 || AX88796B)
 	select EEPROM_93CX6
 	---help---
 	  Select this if your platform comes with an external 93CX6 eeprom.

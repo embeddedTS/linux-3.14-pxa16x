@@ -16,6 +16,7 @@
 #define AXFLG_MAC_FROMDEV		(1<<1)	/* device already has MAC */
 #define AXFLG_HAS_93CX6			(1<<2)	/* use eeprom_93cx6 driver */
 #define AXFLG_MAC_FROMPLATFORM		(1<<3)	/* MAC given by platform data */
+#define AXFLG_BIGENDIAN     (1<<4)
 
 struct ax_plat_data {
 	unsigned int	 flags;
@@ -26,6 +27,14 @@ struct ax_plat_data {
 	u32		*reg_offsets;	/* register offsets */
 	u8		*mac_addr;	/* MAC addr (only used when
 					   AXFLG_MAC_FROMPLATFORM is used */
+
+#if (defined(CONFIG_AX88796B) || defined(CONFIG_AX88796B_MODULE))
+	/* The platform parameters below may be overwritten by module parameters */
+   unsigned int mem;  /* offset from nemory base of board */
+   int irq;
+   int media;
+#endif
+
 };
 
 #endif /* __NET_AX88796_PLAT_H */

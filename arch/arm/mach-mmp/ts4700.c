@@ -28,6 +28,8 @@
 
 #include <asm/gpio.h>
 
+#include <net/ax88796.h>
+
 #include <plat/pxa_u2o.h>
 
 
@@ -305,6 +307,68 @@ int pxa168_gpio_pcie_init(void)
 static struct pxa168_pcie_platform_data pxa168_pcie_data = {
 	.init		= pxa168_gpio_pcie_init,
 };
+#endif
+
+#if (defined(CONFIG_AX88796B) || defined(CONFIG_AX88796B_MODULE))
+static struct resource ts_eth2_resources[] = {
+    [0] = {
+               .start  = 0x81008000,   /* 8-bit interface */
+               .end    = 0x8100835F,   /* cover all possible mappings */
+               .flags  = IORESOURCE_MEM,
+       },
+
+    [1] = {
+               .start  = 0x80008000,   /* 16-bit interface */
+               .end    = 0x8000835F,   /* cover all possible mappings */
+               .flags  = IORESOURCE_MEM,
+       },
+};
+
+/* Asix AX88796 10/100 ethernet controller */
+
+static u8 ax_mac_address0[] = { 0x00, 0xD0, 0x69, 0x12, 0x34, 0x56 };
+static u8 ax_mac_address1[] = { 0x00, 0xD0, 0x69, 0x12, 0x34, 0x57 };
+
+static struct ax_plat_data ts4700_asix_platdata0 = {
+	.flags		= AXFLG_MAC_FROMPLATFORM,
+	.wordlength	= 1,
+	.dcr_val = 0x48,
+	.mac_addr = ax_mac_address0,
+	.mem = 0x100,
+	.irq = 67,  /* PC/104 IRQ 5 */
+	.media = 0, /* auto */
+};
+
+static struct ax_plat_data ts4700_asix_platdata1 = {
+	.flags		= AXFLG_MAC_FROMPLATFORM,
+	.wordlength	= 1,
+	.dcr_val = 0x48,
+	.mac_addr = ax_mac_address1,
+	.mem = 0x140,
+	.irq = 68,  /* PC/104 IRQ 6 */
+	.media = 0, /* auto */
+};
+
+static struct platform_device ts_eth2_device_0 = {
+   .name           = "ax88796b",
+   .id = 0,
+   .dev		= {
+	   .platform_data = &ts4700_asix_platdata0,
+	},
+   .resource       = ts_eth2_resources,
+   .num_resources  = ARRAY_SIZE(ts_eth2_resources),
+};
+
+static struct platform_device ts_eth2_device_1 = {
+   .name           = "ax88796b",
+   .id = 1,
+   .dev		= {
+	   .platform_data = &ts4700_asix_platdata1,
+	},
+};
+
+
+
 #endif
 
 #if defined(CONFIG_PXA168_CF) && defined(CONFIG_PXA168_CF_USE_GPIO_CARDDETECT)
@@ -1288,7 +1352,11 @@ static void __init ts4700_init(void)
 
 #endif
 
-	
+#if (defined(CONFIG_AX88796B) || defined(CONFIG_AX88796B_MODULE))
+   platform_device_register(&ts_eth2_device_0);
+   platform_device_register(&ts_eth2_device_1);
+#endif
+
 #if (defined(CONFIG_FB_PXA168_OLD) || defined(CONFIG_FB_PXA168_OLD_MODULE) || defined(CONFIG_FB_PXA168) || defined(CONFIG_FB_PXA168_MODULE))	
 	if (baseboardHasLCD) {
 		pxa168_add_fb(&ts4700_lcd_info);

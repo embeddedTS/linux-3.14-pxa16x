@@ -539,7 +539,15 @@ int phy_init_hw(struct phy_device *phydev)
 	if (!phydev->drv || !phydev->drv->config_init)
 		return 0;
 
-	ret = phy_write(phydev, MII_BMCR, BMCR_RESET);
+#if (defined(CONFIG_AX88796B) || defined(CONFIG_AX88796B_MODULE))
+   if ((phydev->phy_id & 0xFFFFFFF0) == 0x003B1840) /* This is a hack for the AX88796BLF */                     
+	   ret = phy_write(phydev, MII_BMCR, BMCR_RESET | BMCR_ANENABLE | 
+	      BMCR_FULLDPLX | BMCR_SPEED100);
+	else
+	   ret = phy_write(phydev, MII_BMCR, BMCR_RESET);
+#else
+   ret = phy_write(phydev, MII_BMCR, BMCR_RESET);
+#endif
 	if (ret < 0)
 		return ret;
 
@@ -612,7 +620,7 @@ int phy_attach_direct(struct net_device *dev, struct phy_device *phydev,
 	 */
 	err = phy_init_hw(phydev);
 	if (err)
-		phy_detach(phydev);
+		phy_detach(phydev);		
 	else
 		phy_resume(phydev);
 

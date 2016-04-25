@@ -59,6 +59,18 @@ static const char version2[] =
 
 #define DRV_NAME "ne"
 
+
+
+/* force unsigned long back to 'void __iomem *' */
+#define ax_convert_addr(_a) ((void __force __iomem *)(_a))
+
+#define ei_inb(_a) readb(ax_convert_addr(_a))
+#define ei_outb(_v, _a) writeb(_v, ax_convert_addr(_a))
+
+#define ei_inb_p(_a) ei_inb(_a)
+#define ei_outb_p(_v, _a) ei_outb(_v, _a)
+
+
 /* Some defines that people can play with if so inclined. */
 
 /* Do we support clones that don't adhere to 14,15 of the SAprom ? */
@@ -304,7 +316,7 @@ static int __init ne_probe1(struct net_device *dev, unsigned long ioaddr)
 	if (!request_region(ioaddr, NE_IO_EXTENT, DRV_NAME))
 		return -EBUSY;
 
-	reg0 = inb_p(ioaddr);
+	reg0 = ei_inb(ioaddr);
 	if (reg0 == 0xFF) {
 		ret = -ENODEV;
 		goto err_out;
@@ -313,14 +325,14 @@ static int __init ne_probe1(struct net_device *dev, unsigned long ioaddr)
 	/* Do a preliminary verification that we have a 8390. */
 	{
 		int regd;
-		outb_p(E8390_NODMA+E8390_PAGE1+E8390_STOP, ioaddr + E8390_CMD);
-		regd = inb_p(ioaddr + 0x0d);
-		outb_p(0xff, ioaddr + 0x0d);
-		outb_p(E8390_NODMA+E8390_PAGE0, ioaddr + E8390_CMD);
-		inb_p(ioaddr + EN0_COUNTER0); /* Clear the counter by reading. */
-		if (inb_p(ioaddr + EN0_COUNTER0) != 0) {
-			outb_p(reg0, ioaddr);
-			outb_p(regd, ioaddr + 0x0d);	/* Restore the old values. */
+		ei_outb(E8390_NODMA+E8390_PAGE1+E8390_STOP, ioaddr + E8390_CMD);
+		regd = ei_inb(ioaddr + 0x0d);
+		ei_outb(0xff, ioaddr + 0x0d);
+		ei_outb(E8390_NODMA+E8390_PAGE0, ioaddr + E8390_CMD);
+		ei_inb(ioaddr + EN0_COUNTER0); /* Clear the counter by reading. */
+		if (ei_inb(ioaddr + EN0_COUNTER0) != 0) {
+			ei_outb(reg0, ioaddr);
+			ei_outb(regd, ioaddr + 0x0d);	/* Restore the old values. */
 			ret = -ENODEV;
 			goto err_out;
 		}
@@ -344,10 +356,10 @@ static int __init ne_probe1(struct net_device *dev, unsigned long ioaddr)
 	{
 		unsigned long reset_start_time = jiffies;
 
-		/* DON'T change these to inb_p/outb_p or reset will fail on clones. */
-		outb(inb(ioaddr + NE_RESET), ioaddr + NE_RESET);
+		/* DON'T change these to ei_inb/ei_outb or reset will fail on clones. */
+		ei_outb(ei_inb(ioaddr + NE_RESET), ioaddr + NE_RESET);
 
-		while ((inb_p(ioaddr + EN0_ISR) & ENISR_RESET) == 0)
+		while ((ei_inb(ioaddr + EN0_ISR) & ENISR_RESET) == 0)
 		if (time_after(jiffies, reset_start_time + 2*HZ/100)) {
 			if (bad_card) {
 				pr_cont(" (warning: no reset ack)");
@@ -359,7 +371,7 @@ static int __init ne_probe1(struct net_device *dev, unsigned long ioaddr)
 			}
 		}
 
-		outb_p(0xff, ioaddr + EN0_ISR);		/* Ack all intr. */
+		ei_outb(0xff, ioaddr + EN0_ISR);		/* Ack all intr. */
 	}
 
 	/* Read the 16 bytes of station address PROM.
@@ -385,12 +397,12 @@ static int __init ne_probe1(struct net_device *dev, unsigned long ioaddr)
 		};
 
 		for (i = 0; i < ARRAY_SIZE(program_seq); i++)
-			outb_p(program_seq[i].value, ioaddr + program_seq[i].offset);
+			ei_outb(program_seq[i].value, ioaddr + program_seq[i].offset);
 
 	}
 	for(i = 0; i < 32 /*sizeof(SA_prom)*/; i+=2) {
-		SA_prom[i] = inb(ioaddr + NE_DATAPORT);
-		SA_prom[i+1] = inb(ioaddr + NE_DATAPORT);
+		SA_prom[i] = ei_inb(ioaddr + NE_DATAPORT);
+		SA_prom[i+1] = ei_inb(ioaddr + NE_DATAPORT);
 		if (SA_prom[i] != SA_prom[i+1])
 			wordlength = 1;
 	}
@@ -400,7 +412,7 @@ static int __init ne_probe1(struct net_device *dev, unsigned long ioaddr)
 		for (i = 0; i < 16; i++)
 			SA_prom[i] = SA_prom[i+i];
 		/* We must set the 8390 for word mode. */
-		outb_p(DCR_VAL, ioaddr + EN0_DCFG);
+		ei_outb(DCR_VAL, ioaddr + EN0_DCFG);
 		start_page = NESM_START_PG;
 
 		/*
@@ -410,8 +422,8 @@ static int __init ne_probe1(struct net_device *dev, unsigned long ioaddr)
 		 * the  remote byte count registers (otherwise write-only)...
 		 */
 		if ((DCR_VAL & 0x01) == 0 &&		/* 8-bit mode */
-		    inb(ioaddr + EN0_RCNTLO) == 0x50 &&
-		    inb(ioaddr + EN0_RCNTHI) == 0x70)
+		    ei_inb(ioaddr + EN0_RCNTLO) == 0x50 &&
+		    ei_inb(ioaddr + EN0_RCNTHI) == 0x70)
 			stop_page = 0x60;
 		else
 			stop_page = NESM_STOP_PG;
@@ -476,12 +488,12 @@ static int __init ne_probe1(struct net_device *dev, unsigned long ioaddr)
 	if (dev->irq < 2)
 	{
 		unsigned long cookie = probe_irq_on();
-		outb_p(0x50, ioaddr + EN0_IMR);	/* Enable one interrupt. */
-		outb_p(0x00, ioaddr + EN0_RCNTLO);
-		outb_p(0x00, ioaddr + EN0_RCNTHI);
-		outb_p(E8390_RREAD+E8390_START, ioaddr); /* Trigger it... */
+		ei_outb(0x50, ioaddr + EN0_IMR);	/* Enable one interrupt. */
+		ei_outb(0x00, ioaddr + EN0_RCNTLO);
+		ei_outb(0x00, ioaddr + EN0_RCNTHI);
+		ei_outb(E8390_RREAD+E8390_START, ioaddr); /* Trigger it... */
 		mdelay(10);		/* wait 10ms for interrupt to propagate */
-		outb_p(0x00, ioaddr + EN0_IMR); 		/* Mask it again. */
+		ei_outb(0x00, ioaddr + EN0_IMR); 		/* Mask it again. */
 		dev->irq = probe_irq_off(cookie);
 		if (netif_msg_probe(ei_local))
 			pr_cont(" autoirq is %d", dev->irq);
@@ -507,11 +519,11 @@ static int __init ne_probe1(struct net_device *dev, unsigned long ioaddr)
 	dev->base_addr = ioaddr;
 
 #ifdef CONFIG_PLAT_MAPPI
-	outb_p(E8390_NODMA + E8390_PAGE1 + E8390_STOP,
+	ei_outb(E8390_NODMA + E8390_PAGE1 + E8390_STOP,
 		ioaddr + E8390_CMD); /* 0x61 */
 	for (i = 0; i < ETH_ALEN; i++) {
 		dev->dev_addr[i] = SA_prom[i]
-			= inb_p(ioaddr + EN1_PHYS_SHIFT(i));
+			= ei_inb(ioaddr + EN1_PHYS_SHIFT(i));
 	}
 #else
 	for (i = 0; i < ETH_ALEN; i++) {
@@ -568,19 +580,19 @@ static void ne_reset_8390(struct net_device *dev)
 
 	netif_dbg(ei_local, hw, dev, "resetting the 8390 t=%ld...\n", jiffies);
 
-	/* DON'T change these to inb_p/outb_p or reset will fail on clones. */
-	outb(inb(NE_BASE + NE_RESET), NE_BASE + NE_RESET);
+	/* DON'T change these to ei_inb/ei_outb or reset will fail on clones. */
+	ei_outb(ei_inb(NE_BASE + NE_RESET), NE_BASE + NE_RESET);
 
 	ei_status.txing = 0;
 	ei_status.dmaing = 0;
 
 	/* This check _should_not_ be necessary, omit eventually. */
-	while ((inb_p(NE_BASE+EN0_ISR) & ENISR_RESET) == 0)
+	while ((ei_inb(NE_BASE+EN0_ISR) & ENISR_RESET) == 0)
 		if (time_after(jiffies, reset_start_time + 2*HZ/100)) {
 			netdev_err(dev, "ne_reset_8390() did not complete.\n");
 			break;
 		}
-	outb_p(ENISR_RESET, NE_BASE + EN0_ISR);	/* Ack intr. */
+	ei_outb(ENISR_RESET, NE_BASE + EN0_ISR);	/* Ack intr. */
 }
 
 /* Grab the 8390 specific header. Similar to the block_input routine, but
@@ -602,19 +614,19 @@ static void ne_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr, i
 	}
 
 	ei_status.dmaing |= 0x01;
-	outb_p(E8390_NODMA+E8390_PAGE0+E8390_START, nic_base+ NE_CMD);
-	outb_p(sizeof(struct e8390_pkt_hdr), nic_base + EN0_RCNTLO);
-	outb_p(0, nic_base + EN0_RCNTHI);
-	outb_p(0, nic_base + EN0_RSARLO);		/* On page boundary */
-	outb_p(ring_page, nic_base + EN0_RSARHI);
-	outb_p(E8390_RREAD+E8390_START, nic_base + NE_CMD);
+	ei_outb(E8390_NODMA+E8390_PAGE0+E8390_START, nic_base+ NE_CMD);
+	ei_outb(sizeof(struct e8390_pkt_hdr), nic_base + EN0_RCNTLO);
+	ei_outb(0, nic_base + EN0_RCNTHI);
+	ei_outb(0, nic_base + EN0_RSARLO);		/* On page boundary */
+	ei_outb(ring_page, nic_base + EN0_RSARHI);
+	ei_outb(E8390_RREAD+E8390_START, nic_base + NE_CMD);
 
 	if (ei_status.word16)
 		insw(NE_BASE + NE_DATAPORT, hdr, sizeof(struct e8390_pkt_hdr)>>1);
 	else
 		insb(NE_BASE + NE_DATAPORT, hdr, sizeof(struct e8390_pkt_hdr));
 
-	outb_p(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+	ei_outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
 	ei_status.dmaing &= ~0x01;
 
 	le16_to_cpus(&hdr->count);
@@ -623,7 +635,7 @@ static void ne_get_8390_hdr(struct net_device *dev, struct e8390_pkt_hdr *hdr, i
 /* Block input and output, similar to the Crynwr packet driver.  If you
    are porting to a new ethercard, look at the packet driver source for hints.
    The NEx000 doesn't share the on-board packet memory -- you have to put
-   the packet out through the "remote DMA" dataport using outb. */
+   the packet out through the "remote DMA" dataport using ei_outb. */
 
 static void ne_block_input(struct net_device *dev, int count, struct sk_buff *skb, int ring_offset)
 {
@@ -643,18 +655,18 @@ static void ne_block_input(struct net_device *dev, int count, struct sk_buff *sk
 		return;
 	}
 	ei_status.dmaing |= 0x01;
-	outb_p(E8390_NODMA+E8390_PAGE0+E8390_START, nic_base+ NE_CMD);
-	outb_p(count & 0xff, nic_base + EN0_RCNTLO);
-	outb_p(count >> 8, nic_base + EN0_RCNTHI);
-	outb_p(ring_offset & 0xff, nic_base + EN0_RSARLO);
-	outb_p(ring_offset >> 8, nic_base + EN0_RSARHI);
-	outb_p(E8390_RREAD+E8390_START, nic_base + NE_CMD);
+	ei_outb(E8390_NODMA+E8390_PAGE0+E8390_START, nic_base+ NE_CMD);
+	ei_outb(count & 0xff, nic_base + EN0_RCNTLO);
+	ei_outb(count >> 8, nic_base + EN0_RCNTHI);
+	ei_outb(ring_offset & 0xff, nic_base + EN0_RSARLO);
+	ei_outb(ring_offset >> 8, nic_base + EN0_RSARHI);
+	ei_outb(E8390_RREAD+E8390_START, nic_base + NE_CMD);
 	if (ei_status.word16)
 	{
 		insw(NE_BASE + NE_DATAPORT,buf,count>>1);
 		if (count & 0x01)
 		{
-			buf[count-1] = inb(NE_BASE + NE_DATAPORT);
+			buf[count-1] = ei_inb(NE_BASE + NE_DATAPORT);
 #ifdef NE_SANITY_CHECK
 			xfer_count++;
 #endif
@@ -674,10 +686,10 @@ static void ne_block_input(struct net_device *dev, int count, struct sk_buff *sk
 		/* DMA termination address check... */
 		int addr, tries = 20;
 		do {
-			/* DON'T check for 'inb_p(EN0_ISR) & ENISR_RDC' here
+			/* DON'T check for 'ei_inb(EN0_ISR) & ENISR_RDC' here
 			   -- it's broken for Rx on some cards! */
-			int high = inb_p(nic_base + EN0_RSARHI);
-			int low = inb_p(nic_base + EN0_RSARLO);
+			int high = ei_inb(nic_base + EN0_RSARHI);
+			int low = ei_inb(nic_base + EN0_RSARLO);
 			addr = (high << 8) + low;
 			if (((ring_offset + xfer_count) & 0xff) == low)
 				break;
@@ -688,7 +700,7 @@ static void ne_block_input(struct net_device *dev, int count, struct sk_buff *sk
 				    ring_offset + xfer_count, addr);
 	}
 #endif
-	outb_p(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+	ei_outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
 	ei_status.dmaing &= ~0x01;
 }
 
@@ -719,7 +731,7 @@ static void ne_block_output(struct net_device *dev, int count,
 	}
 	ei_status.dmaing |= 0x01;
 	/* We should already be in page 0, but to be safe... */
-	outb_p(E8390_PAGE0+E8390_START+E8390_NODMA, nic_base + NE_CMD);
+	ei_outb(E8390_PAGE0+E8390_START+E8390_NODMA, nic_base + NE_CMD);
 
 #ifdef NE_SANITY_CHECK
 retry:
@@ -731,24 +743,24 @@ retry:
 	   Actually this doesn't always work either, but if you have
 	   problems with your NEx000 this is better than nothing! */
 
-	outb_p(0x42, nic_base + EN0_RCNTLO);
-	outb_p(0x00,   nic_base + EN0_RCNTHI);
-	outb_p(0x42, nic_base + EN0_RSARLO);
-	outb_p(0x00, nic_base + EN0_RSARHI);
-	outb_p(E8390_RREAD+E8390_START, nic_base + NE_CMD);
+	ei_outb(0x42, nic_base + EN0_RCNTLO);
+	ei_outb(0x00,   nic_base + EN0_RCNTHI);
+	ei_outb(0x42, nic_base + EN0_RSARLO);
+	ei_outb(0x00, nic_base + EN0_RSARHI);
+	ei_outb(E8390_RREAD+E8390_START, nic_base + NE_CMD);
 	/* Make certain that the dummy read has occurred. */
 	udelay(6);
 #endif
 
-	outb_p(ENISR_RDC, nic_base + EN0_ISR);
+	ei_outb(ENISR_RDC, nic_base + EN0_ISR);
 
 	/* Now the normal output. */
-	outb_p(count & 0xff, nic_base + EN0_RCNTLO);
-	outb_p(count >> 8,   nic_base + EN0_RCNTHI);
-	outb_p(0x00, nic_base + EN0_RSARLO);
-	outb_p(start_page, nic_base + EN0_RSARHI);
+	ei_outb(count & 0xff, nic_base + EN0_RCNTLO);
+	ei_outb(count >> 8,   nic_base + EN0_RCNTHI);
+	ei_outb(0x00, nic_base + EN0_RSARLO);
+	ei_outb(start_page, nic_base + EN0_RSARHI);
 
-	outb_p(E8390_RWRITE+E8390_START, nic_base + NE_CMD);
+	ei_outb(E8390_RWRITE+E8390_START, nic_base + NE_CMD);
 	if (ei_status.word16) {
 		outsw(NE_BASE + NE_DATAPORT, buf, count>>1);
 	} else {
@@ -766,8 +778,8 @@ retry:
 		/* DMA termination address check... */
 		int addr, tries = 20;
 		do {
-			int high = inb_p(nic_base + EN0_RSARHI);
-			int low = inb_p(nic_base + EN0_RSARLO);
+			int high = ei_inb(nic_base + EN0_RSARHI);
+			int low = ei_inb(nic_base + EN0_RSARLO);
 			addr = (high << 8) + low;
 			if ((start_page << 8) + count == addr)
 				break;
@@ -784,7 +796,7 @@ retry:
 	}
 #endif
 
-	while ((inb_p(nic_base + EN0_ISR) & ENISR_RDC) == 0)
+	while ((ei_inb(nic_base + EN0_ISR) & ENISR_RDC) == 0)
 		if (time_after(jiffies, dma_start + 2*HZ/100)) {		/* 20ms */
 			netdev_warn(dev, "timeout waiting for Tx RDC.\n");
 			ne_reset_8390(dev);
@@ -792,7 +804,7 @@ retry:
 			break;
 		}
 
-	outb_p(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
+	ei_outb(ENISR_RDC, nic_base + EN0_ISR);	/* Ack intr. */
 	ei_status.dmaing &= ~0x01;
 }
 
@@ -812,6 +824,7 @@ static int __init ne_drv_probe(struct platform_device *pdev)
 	 */
 	res = platform_get_resource(pdev, IORESOURCE_IO, 0);
 	if (res) {
+
 		dev->base_addr = res->start;
 		dev->irq = platform_get_irq(pdev, 0);
 	} else {
@@ -823,6 +836,7 @@ static int __init ne_drv_probe(struct platform_device *pdev)
 		dev->irq = irq[this_dev];
 		dev->mem_end = bad[this_dev];
 	}
+
 	SET_NETDEV_DEV(dev, &pdev->dev);
 	err = do_ne_probe(dev);
 	if (err) {

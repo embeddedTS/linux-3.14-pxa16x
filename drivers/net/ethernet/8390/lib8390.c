@@ -455,7 +455,7 @@ static irqreturn_t __ei_interrupt(int irq, void *dev_id)
 	/* !!Assumption!! -- we stay in page 0.	 Don't break this. */
 	while ((interrupts = ei_inb_p(e8390_base + EN0_ISR)) != 0 &&
 	       ++nr_serviced < MAX_SERVICE) {
-		if (!netif_running(dev)) {
+	   if (!netif_running(dev)) {
 			netdev_warn(dev, "interrupt from stopped card\n");
 			/* rmk - acknowledge the interrupts */
 			ei_outb_p(interrupts, e8390_base + EN0_ISR);
@@ -666,6 +666,7 @@ static void ei_receive(struct net_device *dev)
 		/* Get the rx page (incoming packet pointer). */
 		ei_outb_p(E8390_NODMA+E8390_PAGE1, e8390_base + E8390_CMD);
 		rxing_page = ei_inb_p(e8390_base + EN1_CURPAG);
+
 		ei_outb_p(E8390_NODMA+E8390_PAGE0, e8390_base + E8390_CMD);
 
 		/* Remove one frame from the ring.  Boundary is always a page behind. */
@@ -1011,6 +1012,8 @@ static void __NS8390_init(struct net_device *dev, int startp)
 	int endcfg = ei_local->word16
 	    ? (0x48 | ENDCFG_WTS | (ei_local->bigendian ? ENDCFG_BOS : 0))
 	    : 0x48;
+	    
+//printk("%s %d, e8390_base: 0x%08lX, startp: %d, word16 = 0x%08lX\n", __func__, __LINE__, (unsigned long)e8390_base, startp, ei_local->word16);
 
 	if (sizeof(struct e8390_pkt_hdr) != 4)
 		panic("8390.c: header struct mispacked\n");
