@@ -446,7 +446,7 @@ CONFIG_ATAGS=y
 # CONFIG_DEPRECATED_PARAM_STRUCT is not set
 CONFIG_ZBOOT_ROM_TEXT=0x0
 CONFIG_ZBOOT_ROM_BSS=0x0
-CONFIG_CMDLINE="root=/dev/ram0 init=/init mem=512M lpj=3981312  nbd.max_part=63 console=ttyS0,115200"
+CONFIG_CMDLINE="root=/dev/ram0 init=/init mem=512M lpj=3981312  nbd.max_part=63 console=ttyS0,115200 loglevel=3"
 CONFIG_CMDLINE_FROM_BOOTLOADER=y
 # CONFIG_CMDLINE_EXTEND is not set
 # CONFIG_CMDLINE_FORCE is not set
