@@ -62,6 +62,8 @@ static void mux_irq_handler(unsigned int irq, struct irq_desc *desc)
          if(fpga_irq_reg & bit)            
             generic_handle_irq(MIN_FPGA_IRQ + n);         
       }
+      
+   ICU_INT_CONF(0xfc) |= 1 ; /* Unmask SMC_IRQ */
      
 }
 
