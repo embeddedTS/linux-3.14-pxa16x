@@ -1,20 +1,20 @@
 /*
- * Digital I/O driver for Technologic Systems TS-5500
+ * Digital I/O driver for embeddedTS TS-5500
  *
  * Copyright (c) 2012 Savoir-faire Linux Inc.
  *	Vivien Didelot <vivien.didelot@savoirfairelinux.com>
  *
- * Technologic Systems platforms have pin blocks, exposing several Digital
+ * embeddedTS platforms have pin blocks, exposing several Digital
  * Input/Output lines (DIO). This driver aims to support single pin blocks.
  * In that sense, the support is not limited to the TS-5500 blocks.
  * Actually, the following platforms have DIO support:
  *
  * TS-5500:
- *   Documentation: http://wiki.embeddedarm.com/wiki/TS-5500
+ *   Documentation: http://wiki.embeddedTS.com/wiki/TS-5500
  *   Blocks: DIO1, DIO2 and LCD port.
  *
  * TS-5600:
- *   Documentation: http://wiki.embeddedarm.com/wiki/TS-5600
+ *   Documentation: http://wiki.embeddedTS.com/wiki/TS-5600
  *   Blocks: LCD port (identical to TS-5500 LCD).
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 
-/* List of supported Technologic Systems platforms DIO blocks */
+/* List of supported embeddedTS platforms DIO blocks */
 enum ts5500_blocks { TS5500_DIO1, TS5500_DIO2, TS5500_LCD, TS5600_LCD };
 
 struct ts5500_priv {
@@ -463,4 +463,4 @@ module_platform_driver(ts5500_dio_driver);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Savoir-faire Linux Inc. <kernel@savoirfairelinux.com>");
-MODULE_DESCRIPTION("Technologic Systems TS-5500 Digital I/O driver");
+MODULE_DESCRIPTION("embeddedTS TS-5500 Digital I/O driver");

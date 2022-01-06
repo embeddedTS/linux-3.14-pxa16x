@@ -1065,7 +1065,7 @@ F:	arch/arm/mach-mv78xx0/
 F:	arch/arm/mach-orion5x/
 F:	arch/arm/plat-orion/
 
-ARM/Orion SoC/Technologic Systems TS-78xx platform support
+ARM/Orion SoC/embeddedTS TS-78xx platform support
 M:	Alexander Clouter <alex@digriz.org.uk>
 L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
 W:	http://www.digriz.org.uk/ts78xx/kernel
@@ -1284,7 +1284,7 @@ W:	http://www.stlinux.com
 S:	Maintained
 F:	arch/arm/mach-sti/
 
-ARM/TECHNOLOGIC SYSTEMS TS7250 MACHINE SUPPORT
+ARM/embeddedTS TS7250 MACHINE SUPPORT
 M:	Lennert Buytenhek <kernel@wantstofly.org>
 L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
 S:	Maintained
@@ -8611,7 +8611,7 @@ F:	drivers/net/team/
 F:	include/linux/if_team.h
 F:	include/uapi/linux/if_team.h
 
-TECHNOLOGIC SYSTEMS TS-5500 PLATFORM SUPPORT
+embeddedTS TS-5500 PLATFORM SUPPORT
 M:	Savoir-faire Linux Inc. <kernel@savoirfairelinux.com>
 S:	Maintained
 F:	arch/x86/platform/ts5500/

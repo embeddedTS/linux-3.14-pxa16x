@@ -424,7 +424,7 @@ mohawk_crval:
 	string	cpu_arch_name, "armv5te"
 	string	cpu_elf_name, "v5"
 #ifdef CONFIG_MACH_TS47XX
-   @ The Technologic Systems' sdctl utility (and others) expects to 
+   @ The embeddedTS' sdctl utility (and others) expects to 
    @ find the 'Mohawk' string in /proc/cpuinfo
    string	cpu_mohawk_name, "Marvell Mohawk" 
 #else

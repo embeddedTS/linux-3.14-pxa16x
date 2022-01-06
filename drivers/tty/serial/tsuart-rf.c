@@ -1,12 +1,12 @@
 /*
  *  linux/drivers/serial/tsuart-rf.c
  *
- *  TS-UART loader for Technologic Systems TS-RF2
+ *  TS-UART loader for embeddedTS TS-RF2
  *
- *  (c) 2006 Technologic Systems
+ *  (c) 2006 embeddedTS
  *
  * This source code is hereby licensed to the Linux 2.4 kernel under the
- * GPL, and to Technologic Systems customers under the BSD license.
+ * GPL, and to embeddedTS customers under the BSD license.
  *
  * 2007-11-28:mos:initial 2.6 version ported from 2.4 version
  *

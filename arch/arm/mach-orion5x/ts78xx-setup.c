@@ -612,7 +612,7 @@ static void __init ts78xx_init(void)
 		pr_err("sysfs_create_file failed: %d\n", ret);
 }
 
-MACHINE_START(TS78XX, "Technologic Systems TS-78xx SBC")
+MACHINE_START(TS78XX, "embeddedTS TS-78xx SBC")
 	/* Maintainer: Alexander Clouter <alex@digriz.org.uk> */
 	.atag_offset	= 0x100,
 	.init_machine	= ts78xx_init,

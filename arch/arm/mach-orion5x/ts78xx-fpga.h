@@ -6,7 +6,7 @@
  * do *not* make up your own or 'borrow' any!
  */
 enum fpga_ids {
-	/* Technologic Systems */
+	/* embeddedTS */
 	TS7800_REV_1	= FPGAID(TS7800_FPGA_MAGIC, 0x01),
 	TS7800_REV_2	= FPGAID(TS7800_FPGA_MAGIC, 0x02),
 	TS7800_REV_3	= FPGAID(TS7800_FPGA_MAGIC, 0x03),
@@ -27,7 +27,7 @@ struct fpga_device {
 };
 
 struct fpga_devices {
-	/* Technologic Systems */
+	/* embeddedTS */
 	struct fpga_device	ts_rtc;
 	struct fpga_device	ts_nand;
 	struct fpga_device	ts_rng;

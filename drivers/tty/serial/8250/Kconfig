@@ -308,5 +308,5 @@ config SERIAL_TS4700_ISA16550
    depends on SERIAL_8250 && MACH_TS47XX
    help
      TS-4700 ISA 16550 serial port support.  
-     Select this if you want to use Technologic Systems PC-104
+     Select this if you want to use embeddedTS PC-104
      products that have 16550-style UARTS, e.g., the TS-SER2 board.

@@ -145,7 +145,7 @@ static inline unsigned short bit_HWCTS(unsigned reg_value)
   return (reg_value & 0x4000) == 0x4000;
 }
 
-MODULE_AUTHOR("Technologic Systems");
+MODULE_AUTHOR("embeddedTS");
 MODULE_LICENSE("GPL");  // or BSD.  Take your pick!
 static int portDebug=0;
 module_param(portDebug,int,0644);

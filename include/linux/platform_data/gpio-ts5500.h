@@ -1,5 +1,5 @@
 /*
- * GPIO (DIO) header for Technologic Systems TS-5500
+ * GPIO (DIO) header for embeddedTS TS-5500
  *
  * Copyright (c) 2012 Savoir-faire Linux Inc.
  *	Vivien Didelot <vivien.didelot@savoirfairelinux.com>

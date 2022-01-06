@@ -73,7 +73,7 @@ DT_MACHINE_START(PXA910_DT, "Marvell PXA910 (Device Tree Support)")
 	.dt_compat	= mmp_dt_board_compat,
 MACHINE_END
 
-DT_MACHINE_START(TS47XX_DT, "Technologic Systems TS-471X (Device Tree Support)")
+DT_MACHINE_START(TS47XX_DT, "embeddedTS TS-471X (Device Tree Support)")
 	.map_io		= mmp_map_io,
 	.init_time	= mmp_dt_init_timer,
 	.init_machine	= pxa168_dt_init,

@@ -47,7 +47,7 @@ config AX88796B
    select CRC32
 	select MII
    ---help---
-     Support for ASIX ax88796b on Technologic Systems peripheral boards
+     Support for ASIX ax88796b on embeddedTS peripheral boards
 
 config AX88796_93CX6
 	bool "ASIX AX88796 external 93CX6 eeprom support"

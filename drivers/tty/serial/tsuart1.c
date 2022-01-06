@@ -1,12 +1,12 @@
 /*
  *  linux/drivers/serial/tsuart1.c
  *
- *  Linux 2.6 Driver for Technologic Systems UART
+ *  Linux 2.6 Driver for embeddedTS UART
  *
- *  (c) 2007 Technologic Systems
+ *  (c) 2007 embeddedTS
  *
  * This source code is hereby licensed to the Linux 2.4 kernel under the
- * GPL, and to Technologic Systems customers under the BSD license.
+ * GPL, and to embeddedTS customers under the BSD license.
  *
  * 2007-09-27:mos:initial version completed
  * 2007-12-21:mos:now support "Slow" baud rates for boards that can do that
@@ -1345,8 +1345,8 @@ static void __exit tsuart_exit(void)
 module_init(tsuart_init);
 module_exit(tsuart_exit);
 
-MODULE_AUTHOR("Technologic Systems");
-MODULE_DESCRIPTION("Technologic Systems TS-UART driver " __DATE__ " " __TIME__);
+MODULE_AUTHOR("embeddedTS");
+MODULE_DESCRIPTION("embeddedTS TS-UART driver " __DATE__ " " __TIME__);
 MODULE_LICENSE("GPL");  // or BSD.  Take your pick!
 
 EXPORT_SYMBOL(tsuart_configure_driver);

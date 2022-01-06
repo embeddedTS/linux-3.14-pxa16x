@@ -1,6 +1,6 @@
 /*
  * arch/arm/mach-ep93xx/ts72xx.c
- * Technologic Systems TS72xx SBC support.
+ * embeddedTS TS72xx SBC support.
  *
  * Copyright (C) 2006 Lennert Buytenhek <buytenh@wantstofly.org>
  *
@@ -240,7 +240,7 @@ static void __init ts72xx_init_machine(void)
 	ep93xx_register_eth(&ts72xx_eth_data, 1);
 }
 
-MACHINE_START(TS72XX, "Technologic Systems TS-72xx SBC")
+MACHINE_START(TS72XX, "embeddedTS TS-72xx SBC")
 	/* Maintainer: Lennert Buytenhek <buytenh@wantstofly.org> */
 	.atag_offset	= 0x100,
 	.map_io		= ts72xx_map_io,

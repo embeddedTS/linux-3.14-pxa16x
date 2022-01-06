@@ -1,12 +1,12 @@
 /*
  *  linux/drivers/serial/tsuart-bat3.c
  *
- *  TS-UART loader for Technologic Systems TS-BAT3
+ *  TS-UART loader for embeddedTS TS-BAT3
  *
- *  (c) 2007 Technologic Systems
+ *  (c) 2007 embeddedTS
  *
  * This source code is hereby licensed to the Linux 2.6 kernel under the
- * GPL, and to Technologic Systems customers under the BSD license.
+ * GPL, and to embeddedTS customers under the BSD license.
  *
  * 2007-11-28:mos:initial 2.6 version ported from 2.4 version
  *

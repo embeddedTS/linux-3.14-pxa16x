@@ -11,7 +11,7 @@
 /include/ "pxa168.dtsi"
 
 / {
-	model = "Technologic Systems pxa168 TS-471X Board";
+	model = "embeddedTS pxa168 TS-471X Board";
 	compatible = "mrvl,pxa168-ts471x", "mrvl,pxa168";
 
 	chosen {

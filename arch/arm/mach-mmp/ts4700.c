@@ -1,7 +1,7 @@
 /*
  *  linux/arch/arm/mach-mmp/ts4700.c
  *
- *  Support for the Marvell PXA168-based Technologic Systems' ts4700 board
+ *  Support for the Marvell PXA168-based embeddedTS' ts4700 board
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2 as
